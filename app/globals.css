@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-mist: var(--mist);
+  --color-current: var(--current);
+  --color-stream: var(--stream);
+  --color-sun-glint: var(--sun-glint);
+  --color-coral-pulse: var(--coral-pulse);
+  --color-background: var(--mist);
+  --color-foreground: var(--current);
+  --color-primary: var(--stream);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: color-mix(in srgb, var(--current) 8%, var(--mist));
+  --color-secondary-foreground: var(--current);
+  --color-muted: color-mix(in srgb, var(--current) 6%, var(--mist));
+  --color-muted-foreground: color-mix(in srgb, var(--current) 55%, transparent);
+  --color-accent: color-mix(in srgb, var(--stream) 12%, var(--mist));
+  --color-accent-foreground: var(--current);
+  --color-destructive: var(--coral-pulse);
+  --color-destructive-foreground: #ffffff;
+  --color-border: color-mix(in srgb, var(--current) 12%, transparent);
+  --color-input: color-mix(in srgb, var(--current) 12%, transparent);
+  --color-ring: var(--stream);
+  --color-card: var(--mist);
+  --color-card-foreground: var(--current);
+  --color-popover: var(--mist);
+  --color-popover-foreground: var(--current);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --font-display: var(--font-display-family);
+  --font-body: var(--font-body-family);
+  --font-mono: var(--font-mono-family);
+}
+
+:root {
+  --mist: #f7f8f6;
+  --current: #14241f;
+  --stream: #1f8a70;
+  --sun-glint: #e8b14c;
+  --coral-pulse: #e2562f;
+}
+
+.dark {
+  --mist: #111815;
+  --current: #eaefec;
+  --stream: #1f8a70;
+  --sun-glint: #e8b14c;
+  --coral-pulse: #e2562f;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-mist text-current font-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+}
+
+/* Signature "current" underline animation */
+@keyframes current-flow {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@keyframes current-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.current-underline {
+  @apply absolute bottom-0 left-0 h-0.5 w-full bg-stream;
+}
+
+.current-underline--animate {
+  animation: current-flow 0.35s ease-out forwards;
+}
+
+.current-underline--pulse {
+  animation: current-pulse 0.6s ease-in-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .current-underline--animate,
+  .current-underline--pulse {
+    animation: none;
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Hide scrollbar for category rail */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tabular figures for prices */
+.tabular-price {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono-family), ui-monospace, monospace;
+}

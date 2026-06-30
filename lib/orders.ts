@@ -1,0 +1,265 @@
+import { createServiceClient } from "@/lib/supabase/admin";
+import { createCJOrder, type CJOrderResult } from "@/lib/cj";
+import type { CartItemInput, ShippingAddress } from "@/lib/validations";
+
+export type ResolvedCartItem = {
+  productId: string;
+  qty: number;
+  price: number;
+  sku: string;
+  title: string;
+  stock: number;
+};
+
+export async function getExistingOrderByPaypalId(
+  paypalOrderId: string
+): Promise<string | null> {
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from("orders")
+    .select("id")
+    .eq("paypal_order_id", paypalOrderId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+export async function resolveCartItems(
+  items: CartItemInput[]
+): Promise<{ items: ResolvedCartItem[]; total: number } | { error: string }> {
+  const supabase = createServiceClient();
+  const productIds = items.map((i) => i.productId);
+
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("id, price_usd, stock, sku, title, is_active")
+    .in("id", productIds);
+
+  if (error || !products) {
+    return { error: "Failed to fetch products" };
+  }
+
+  const productMap = new Map(products.map((p) => [p.id, p]));
+  const resolved: ResolvedCartItem[] = [];
+  let total = 0;
+
+  for (const item of items) {
+    const product = productMap.get(item.productId);
+    if (!product || !product.is_active) {
+      return { error: `Product ${item.productId} is unavailable` };
+    }
+    if (product.stock < item.qty) {
+      return { error: `"${product.title}" is out of stock` };
+    }
+    const price = Number(product.price_usd);
+    total += price * item.qty;
+    resolved.push({
+      productId: product.id,
+      qty: item.qty,
+      price,
+      sku: product.sku,
+      title: product.title,
+      stock: product.stock,
+    });
+  }
+
+  return { items: resolved, total };
+}
+
+export async function savePendingCheckout(params: {
+  paypalOrderId: string;
+  userId: string;
+  items: CartItemInput[];
+  shippingCountry: string;
+}): Promise<void> {
+  const supabase = createServiceClient();
+  const { error } = await supabase.from("paypal_checkout_pending").upsert(
+    {
+      paypal_order_id: params.paypalOrderId,
+      user_id: params.userId,
+      items: params.items,
+      shipping_country: params.shippingCountry,
+    },
+    { onConflict: "paypal_order_id" }
+  );
+  if (error) {
+    console.error("[pending-checkout] save failed:", error);
+  }
+}
+
+export async function updatePendingShipping(
+  paypalOrderId: string,
+  shipping: ShippingAddress
+): Promise<void> {
+  const supabase = createServiceClient();
+  await supabase
+    .from("paypal_checkout_pending")
+    .update({ shipping })
+    .eq("paypal_order_id", paypalOrderId);
+}
+
+export async function deletePendingCheckout(
+  paypalOrderId: string
+): Promise<void> {
+  const supabase = createServiceClient();
+  await supabase
+    .from("paypal_checkout_pending")
+    .delete()
+    .eq("paypal_order_id", paypalOrderId);
+}
+
+type PendingCheckout = {
+  user_id: string;
+  items: CartItemInput[];
+  shipping: ShippingAddress | null;
+  shipping_country: string;
+};
+
+async function getPendingCheckout(
+  paypalOrderId: string
+): Promise<PendingCheckout | null> {
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from("paypal_checkout_pending")
+    .select("user_id, items, shipping, shipping_country")
+    .eq("paypal_order_id", paypalOrderId)
+    .maybeSingle();
+
+  if (!data) return null;
+  return {
+    user_id: data.user_id,
+    items: data.items as CartItemInput[],
+    shipping: data.shipping as ShippingAddress | null,
+    shipping_country: data.shipping_country,
+  };
+}
+
+/**
+ * Branch on CJ createCJOrder result — shared by capture + webhook paths.
+ */
+export async function applyCJFulfillmentResult(
+  orderId: string,
+  cjResult: CJOrderResult
+): Promise<void> {
+  const supabase = createServiceClient();
+
+  if ("skipped" in cjResult) {
+    await supabase
+      .from("orders")
+      .update({ status: "paid_needs_manual_fulfillment" })
+      .eq("id", orderId);
+    return;
+  }
+
+  if (cjResult.success) {
+    await supabase
+      .from("orders")
+      .update({ status: "paid", cj_order_id: cjResult.cjOrderId })
+      .eq("id", orderId);
+    return;
+  }
+
+  console.error(`[CJ] Fulfillment error for order ${orderId}:`, cjResult.error);
+  await supabase
+    .from("orders")
+    .update({ status: "paid_fulfillment_pending" })
+    .eq("id", orderId);
+}
+
+/**
+ * Insert order + items + stock decrement (atomic via RPC), then CJ fulfillment.
+ * Idempotent on paypal_order_id.
+ */
+export async function fulfillOrder(params: {
+  paypalOrderId: string;
+  userId: string;
+  items: CartItemInput[];
+  shipping: ShippingAddress;
+}): Promise<{ orderId: string } | { error: string }> {
+  const existingId = await getExistingOrderByPaypalId(params.paypalOrderId);
+  if (existingId) {
+    return { orderId: existingId };
+  }
+
+  const resolved = await resolveCartItems(params.items);
+  if ("error" in resolved) {
+    return { error: resolved.error };
+  }
+
+  const { items, total } = resolved;
+  const supabase = createServiceClient();
+
+  const rpcItems = items.map((item) => ({
+    product_id: item.productId,
+    qty: item.qty,
+    price: item.price,
+  }));
+
+  const { data: orderId, error: rpcError } = await supabase.rpc(
+    "fulfill_paid_order",
+    {
+      p_user_id: params.userId,
+      p_paypal_order_id: params.paypalOrderId,
+      p_total: total,
+      p_shipping: params.shipping,
+      p_items: rpcItems,
+    }
+  );
+
+  if (rpcError || !orderId) {
+    const dup = await getExistingOrderByPaypalId(params.paypalOrderId);
+    if (dup) return { orderId: dup };
+    console.error("[fulfillOrder] RPC failed:", rpcError);
+    return { error: "Failed to create order" };
+  }
+
+  const cjResult = await createCJOrder({
+    orderId: orderId as string,
+    shipping: params.shipping,
+    items: items.map((i) => ({
+      productId: i.productId,
+      sku: i.sku,
+      qty: i.qty,
+    })),
+  });
+
+  await applyCJFulfillmentResult(orderId as string, cjResult);
+
+  await deletePendingCheckout(params.paypalOrderId);
+  return { orderId: orderId as string };
+}
+
+/**
+ * Webhook safety net when /capture was never called but PayPal captured payment.
+ */
+export async function fulfillOrderFromWebhook(
+  paypalOrderId: string
+): Promise<{ orderId: string } | { skipped: true } | { error: string }> {
+  const existingId = await getExistingOrderByPaypalId(paypalOrderId);
+  if (existingId) {
+    return { orderId: existingId };
+  }
+
+  const pending = await getPendingCheckout(paypalOrderId);
+  if (!pending) {
+    console.warn(
+      "[webhook] No pending checkout for PayPal order:",
+      paypalOrderId
+    );
+    return { skipped: true };
+  }
+
+  if (!pending.shipping) {
+    console.warn(
+      "[webhook] Pending checkout missing shipping for PayPal order:",
+      paypalOrderId
+    );
+    return { skipped: true };
+  }
+
+  return fulfillOrder({
+    paypalOrderId,
+    userId: pending.user_id,
+    items: pending.items,
+    shipping: pending.shipping,
+  });
+}
