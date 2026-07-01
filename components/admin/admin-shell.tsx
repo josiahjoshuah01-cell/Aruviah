@@ -12,6 +12,7 @@ import {
   Star,
   Truck,
   Users,
+  Settings,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -40,6 +41,12 @@ const NAV = [
     label: "Staging",
     icon: ClipboardList,
     badgeKey: "stagingPendingCount" as const,
+  },
+  {
+    href: "/admin/settings",
+    label: "Settings",
+    icon: Settings,
+    badgeKey: "cjUnpaidCount" as const,
   },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/reviews", label: "Reviews", icon: Star },

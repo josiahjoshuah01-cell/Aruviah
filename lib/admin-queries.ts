@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/admin";
 import type { OrderStatus } from "@/lib/order-status";
 import { FULFILLMENT_QUEUE_STATUSES } from "@/lib/order-status";
+import type { CjPaymentStatus } from "@/lib/cj-payment-types";
 import type { ShippingInfo } from "@/lib/types";
 
 export type AdminOrderRow = {
@@ -12,6 +13,9 @@ export type AdminOrderRow = {
   status: string;
   paypal_order_id: string | null;
   cj_order_id: string | null;
+  cj_shipment_order_id: string | null;
+  cj_payment_status: CjPaymentStatus;
+  cj_order_amount_usd: number | null;
   fulfillment_note: string | null;
   tracking_number: string | null;
   shipping: ShippingInfo;
@@ -37,6 +41,17 @@ export type AdminOrderDetail = AdminOrderRow & {
 export type AdminNavBadges = {
   fulfillmentCount: number;
   stagingPendingCount: number;
+  cjUnpaidCount: number;
+};
+
+export type CjAutoPayLogRow = {
+  id: string;
+  order_id: string;
+  cj_shipment_order_id: string | null;
+  amount_usd: number;
+  outcome: string;
+  error_message: string | null;
+  created_at: string;
 };
 
 async function emailsForUserIds(
@@ -65,6 +80,9 @@ function mapOrderRow(
     status: string;
     paypal_order_id: string | null;
     cj_order_id: string | null;
+    cj_shipment_order_id: string | null;
+    cj_payment_status: string;
+    cj_order_amount_usd: number | null;
     fulfillment_note: string | null;
     tracking_number: string | null;
     shipping: unknown;
@@ -81,6 +99,12 @@ function mapOrderRow(
     status: row.status,
     paypal_order_id: row.paypal_order_id,
     cj_order_id: row.cj_order_id,
+    cj_shipment_order_id: row.cj_shipment_order_id,
+    cj_payment_status: row.cj_payment_status as CjPaymentStatus,
+    cj_order_amount_usd:
+      row.cj_order_amount_usd != null
+        ? Number(row.cj_order_amount_usd)
+        : null,
     fulfillment_note: row.fulfillment_note,
     tracking_number: row.tracking_number,
     shipping: row.shipping as ShippingInfo,
@@ -90,7 +114,7 @@ function mapOrderRow(
 
 export async function getAdminNavBadges(): Promise<AdminNavBadges> {
   const supabase = createServiceClient();
-  const [fulfillment, staging] = await Promise.all([
+  const [fulfillment, staging, cjUnpaid] = await Promise.all([
     supabase
       .from("orders")
       .select("id", { count: "exact", head: true })
@@ -99,11 +123,16 @@ export async function getAdminNavBadges(): Promise<AdminNavBadges> {
       .from("staged_products")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending"),
+    supabase
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("cj_payment_status", "unpaid"),
   ]);
 
   return {
     fulfillmentCount: fulfillment.count ?? 0,
     stagingPendingCount: staging.count ?? 0,
+    cjUnpaidCount: cjUnpaid.count ?? 0,
   };
 }
 
@@ -116,7 +145,7 @@ export async function listAdminOrders(options: {
   let query = supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, fulfillment_note, tracking_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, shipping, created_at"
     );
 
   if (options.status && options.status !== "all") {
@@ -155,7 +184,7 @@ export async function getAdminOrderDetail(
   const { data: order, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, fulfillment_note, tracking_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, shipping, created_at"
     )
     .eq("id", orderId)
     .maybeSingle();
@@ -201,7 +230,7 @@ export async function listFulfillmentQueue(): Promise<AdminOrderDetail[]> {
   const { data: orders, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, fulfillment_note, tracking_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, shipping, created_at"
     )
     .in("status", FULFILLMENT_QUEUE_STATUSES)
     .order("created_at", { ascending: true });
@@ -247,6 +276,40 @@ export async function listFulfillmentQueue(): Promise<AdminOrderDetail[]> {
     ...mapOrderRow(order, emails.get(order.user_id) ?? null),
     items: itemsByOrder.get(order.id) ?? [],
   }));
+}
+
+export async function listRecentAutoPayLogs(
+  limit = 20
+): Promise<CjAutoPayLogRow[]> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("cj_auto_pay_logs")
+    .select(
+      "id, order_id, cj_shipment_order_id, amount_usd, outcome, error_message, created_at"
+    )
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return (data ?? []).map((row) => ({
+    ...row,
+    amount_usd: Number(row.amount_usd),
+  }));
+}
+
+export async function listOrdersNeedingCjPayment(): Promise<AdminOrderRow[]> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, shipping, created_at"
+    )
+    .eq("cj_payment_status", "unpaid")
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  const emails = await emailsForUserIds((data ?? []).map((r) => r.user_id));
+  return (data ?? []).map((r) => mapOrderRow(r, emails.get(r.user_id) ?? null));
 }
 
 export function inferFulfillmentStuckReason(order: AdminOrderRow): string {

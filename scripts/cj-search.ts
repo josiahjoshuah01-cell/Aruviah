@@ -4,8 +4,7 @@
  */
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
-import { createClient } from "@supabase/supabase-js";
-import { stageCjSearch } from "../lib/cj-staging";
+import { runCjSearch } from "../lib/cj-search";
 
 function loadEnvLocal() {
   const envPath = resolve(process.cwd(), ".env.local");
@@ -58,27 +57,17 @@ async function main() {
     process.exit(1);
   }
 
-  if (!process.env.CJ_API_KEY?.trim()) {
-    throw new Error("CJ_API_KEY missing in .env.local");
-  }
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error("Supabase env vars missing in .env.local");
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
-
-  const row = await stageCjSearch(
-    supabase,
-    keyword,
-    categorySlug,
-    process.env.CJ_API_KEY
-  );
+  const result = await runCjSearch(keyword, categorySlug);
+  if (!result.ok) {
+    throw new Error(result.error);
+  }
 
   console.log("\n=== CJ STAGED (pending review) ===");
-  printSummary([row]);
+  printSummary([result.row]);
   console.log(`\nReview at: ${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/admin/staging`);
 }
 

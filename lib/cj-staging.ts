@@ -104,12 +104,23 @@ const SLUG_TERMS: Record<string, string[]> = {
   garden: ["garden", "plant", "lawn", "watering", "pot"],
 };
 
+/** Fallback for DB categories not listed in SLUG_TERMS (e.g. wedding-hair-jewelry). */
+function termsForCategorySlug(slug: string): string[] {
+  const mapped = SLUG_TERMS[slug];
+  if (mapped) return mapped;
+  return slug
+    .split(/[-_]/)
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => t.length >= 2);
+}
+
 function matchesCategorySlug(
   slug: string,
   productName: string,
   cjCategory?: string
 ): boolean {
-  const terms = SLUG_TERMS[slug] ?? [];
+  const terms = termsForCategorySlug(slug);
+  if (terms.length === 0) return true;
   const haystack = `${productName} ${cjCategory ?? ""}`.toLowerCase();
   return terms.some((t) => haystack.includes(t));
 }
@@ -157,6 +168,149 @@ type FetchedCjProduct = {
   coverImage: string | null;
   listShippingCountryCodes: string[] | null;
 };
+
+export type { FetchedCjProduct };
+
+export type CjQueryParam = "pid" | "productSku" | "variantSku";
+
+export async function queryCjProductDetail(
+  headers: Record<string, string>,
+  param: CjQueryParam,
+  value: string
+): Promise<CJProductDetail | null> {
+  await sleep(300);
+  const queryUrl = `${CJ_API_BASE}/product/query?${param}=${encodeURIComponent(value)}&countryCode=US`;
+  const queryRes = await fetch(queryUrl, { headers });
+  const queryBody = (await queryRes.json()) as CJApiEnvelope<CJProductDetail>;
+  if (queryBody.code !== 200 || !queryBody.data?.pid) {
+    return null;
+  }
+  return queryBody.data;
+}
+
+export async function fetchCjVariantsByPid(
+  headers: Record<string, string>,
+  pid: string
+): Promise<CJVariant[]> {
+  await sleep(200);
+  const url = `${CJ_API_BASE}/product/variant/query?pid=${encodeURIComponent(pid)}&countryCode=US`;
+  const body = (await fetch(url, { headers }).then((r) =>
+    r.json()
+  )) as CJApiEnvelope<CJVariant[]>;
+  if (body.code !== 200 || !Array.isArray(body.data)) {
+    return [];
+  }
+  return body.data;
+}
+
+export async function enrichCjVariants(
+  headers: Record<string, string>,
+  detail: CJProductDetail,
+  seedVariants: CJVariant[]
+): Promise<CJVariant[]> {
+  const enrichedVariants: CJVariant[] = [];
+  for (const v of seedVariants.slice(0, 24)) {
+    if (!v.vid) continue;
+    await sleep(200);
+    const vidUrl = `${CJ_API_BASE}/product/variant/queryByVid?vid=${encodeURIComponent(v.vid)}&features=enable_inventory`;
+    const vidBody = (await fetch(vidUrl, { headers }).then((r) =>
+      r.json()
+    )) as CJApiEnvelope<CJVariant>;
+    let merged: CJVariant = v;
+    if (vidBody.code === 200 && vidBody.data) {
+      merged = { ...v, ...vidBody.data };
+    }
+
+    await sleep(150);
+    const stockUrl = `${CJ_API_BASE}/product/stock/queryByVid?vid=${encodeURIComponent(v.vid)}`;
+    const stockBody = (await fetch(stockUrl, { headers }).then((r) =>
+      r.json()
+    )) as CJApiEnvelope<CJStockRow[] | CJStockRow>;
+    const stockRows = Array.isArray(stockBody.data)
+      ? stockBody.data
+      : stockBody.data
+        ? [stockBody.data]
+        : [];
+    enrichedVariants.push({ ...merged, _stockRows: stockRows });
+  }
+  return enrichedVariants;
+}
+
+export async function buildFetchedCjProduct(
+  headers: Record<string, string>,
+  detail: CJProductDetail,
+  listShippingCountryCodes: string[] | null,
+  fallbackListImage?: string | null
+): Promise<FetchedCjProduct | null> {
+  let seedVariants = detail.variants ?? [];
+  if (!seedVariants.length && detail.pid) {
+    seedVariants = await fetchCjVariantsByPid(headers, detail.pid);
+  }
+  if (!seedVariants.length) return null;
+
+  const enrichedVariants = await enrichCjVariants(headers, detail, seedVariants);
+  const withPrice = enrichedVariants.filter(
+    (v) =>
+      parsePrice(v.variantSellPrice) > 0 || parsePrice(detail.sellPrice) > 0
+  );
+  if (withPrice.length === 0) return null;
+
+  const coverImage =
+    detail.bigImage ||
+    detail.productImageSet?.[0] ||
+    withPrice[0]?.variantImage ||
+    fallbackListImage ||
+    null;
+
+  return {
+    detail,
+    variants: withPrice,
+    coverImage,
+    listShippingCountryCodes,
+  };
+}
+
+export async function persistStagedProduct(
+  supabase: SupabaseClient,
+  row: StagedProductInsert
+): Promise<StagedProductInsert> {
+  const { data: live } = await supabase
+    .from("products")
+    .select("id")
+    .eq("cj_product_id", row.cj_product_id)
+    .maybeSingle();
+
+  if (live) {
+    throw new Error(
+      `Product already live (cj_product_id ${row.cj_product_id})`
+    );
+  }
+
+  const { data: pending } = await supabase
+    .from("staged_products")
+    .select("id")
+    .eq("cj_product_id", row.cj_product_id)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (pending) {
+    throw new Error(
+      `Product already staged as pending (cj_product_id ${row.cj_product_id})`
+    );
+  }
+
+  const { error } = await supabase.from("staged_products").insert({
+    ...row,
+    status: "pending",
+  });
+
+  if (error) {
+    throw new Error(`Failed to insert staged product: ${error.message}`);
+  }
+
+  return row;
+}
+
 export async function fetchCjProductForStaging(
   keyword: string,
   categorySlug: string,
@@ -196,50 +350,12 @@ export async function fetchCjProductForStaging(
     return null;
   }
 
-  const enrichedVariants: CJVariant[] = [];
-  for (const v of detail.variants.slice(0, 24)) {
-    if (!v.vid) continue;
-    await sleep(200);
-    const vidUrl = `${CJ_API_BASE}/product/variant/queryByVid?vid=${encodeURIComponent(v.vid)}&features=enable_inventory`;
-    const vidBody = (await fetch(vidUrl, { headers }).then((r) =>
-      r.json()
-    )) as CJApiEnvelope<CJVariant>;
-    let merged: CJVariant = v;
-    if (vidBody.code === 200 && vidBody.data) {
-      merged = { ...v, ...vidBody.data };
-    }
-
-    await sleep(150);
-    const stockUrl = `${CJ_API_BASE}/product/stock/queryByVid?vid=${encodeURIComponent(v.vid)}`;
-    const stockBody = (await fetch(stockUrl, { headers }).then((r) =>
-      r.json()
-    )) as CJApiEnvelope<CJStockRow[] | CJStockRow>;
-    const stockRows = Array.isArray(stockBody.data)
-      ? stockBody.data
-      : stockBody.data
-        ? [stockBody.data]
-        : [];
-    enrichedVariants.push({ ...merged, _stockRows: stockRows });
-  }
-  const withPrice = enrichedVariants.filter(
-    (v) =>
-      parsePrice(v.variantSellPrice) > 0 || parsePrice(detail.sellPrice) > 0
-  );
-  if (withPrice.length === 0) return null;
-
-  const coverImage =
-    detail.bigImage ||
-    detail.productImageSet?.[0] ||
-    withPrice[0]?.variantImage ||
-    candidate.productImage ||
-    null;
-
-  return {
+  return buildFetchedCjProduct(
+    headers,
     detail,
-    variants: withPrice,
-    coverImage,
-    listShippingCountryCodes: candidate.shippingCountryCodes ?? null,
-  };
+    candidate.shippingCountryCodes ?? null,
+    candidate.productImage
+  );
 }
 
 export function buildStagedRow(
@@ -339,39 +455,6 @@ export async function stageCjSearch(
     keyword,
     fetched.listShippingCountryCodes
   );
-  const { data: live } = await supabase
-    .from("products")
-    .select("id")
-    .eq("cj_product_id", row.cj_product_id)
-    .maybeSingle();
 
-  if (live) {
-    throw new Error(
-      `Product already live (cj_product_id ${row.cj_product_id})`
-    );
-  }
-
-  const { data: pending } = await supabase
-    .from("staged_products")
-    .select("id")
-    .eq("cj_product_id", row.cj_product_id)
-    .eq("status", "pending")
-    .maybeSingle();
-
-  if (pending) {
-    throw new Error(
-      `Product already staged as pending (cj_product_id ${row.cj_product_id})`
-    );
-  }
-
-  const { error } = await supabase.from("staged_products").insert({
-    ...row,
-    status: "pending",
-  });
-
-  if (error) {
-    throw new Error(`Failed to insert staged product: ${error.message}`);
-  }
-
-  return row;
+  return persistStagedProduct(supabase, row);
 }

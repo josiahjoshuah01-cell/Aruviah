@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
+import { CjPaymentStatusBadge } from "@/components/admin/cj-payment-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ORDER_STATUSES } from "@/lib/order-status";
@@ -94,6 +95,7 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
             <th className="px-4 py-3 font-medium">Customer</th>
             <th className="px-4 py-3 font-medium">Total</th>
             <th className="px-4 py-3 font-medium">Status</th>
+            <th className="px-4 py-3 font-medium">CJ pay</th>
             <th className="px-4 py-3 font-medium">PayPal</th>
             <th className="px-4 py-3 font-medium">Date</th>
           </tr>
@@ -117,6 +119,9 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
               </td>
               <td className="px-4 py-3">
                 <OrderStatusBadge status={order.status} />
+              </td>
+              <td className="px-4 py-3">
+                <CjPaymentStatusBadge status={order.cj_payment_status} />
               </td>
               <td className="max-w-[120px] truncate px-4 py-3 font-mono text-xs text-muted-foreground">
                 {order.paypal_order_id ?? "—"}

@@ -1,5 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/admin";
 import { createCJOrder, type CJOrderResult } from "@/lib/cj";
+import { parseCjOrderAmountUsd, tryAutoPayCjOrder } from "@/lib/cj-payment";
 import type { CartItemInput, ShippingAddress } from "@/lib/validations";
 
 export type ResolvedCartItem = {
@@ -151,7 +152,8 @@ async function getPendingCheckout(
  */
 export async function applyCJFulfillmentResult(
   orderId: string,
-  cjResult: CJOrderResult
+  cjResult: CJOrderResult,
+  orderTotalUsd?: number
 ): Promise<void> {
   const supabase = createServiceClient();
 
@@ -165,20 +167,32 @@ export async function applyCJFulfillmentResult(
       .update({
         status: "paid_needs_manual_fulfillment",
         fulfillment_note: note,
+        cj_payment_status: "not_required",
       })
       .eq("id", orderId);
     return;
   }
 
   if (cjResult.success) {
+    const amountUsd =
+      cjResult.orderAmountUsd > 0
+        ? cjResult.orderAmountUsd
+        : parseCjOrderAmountUsd(null, null, orderTotalUsd);
+
     await supabase
       .from("orders")
       .update({
         status: "paid",
         cj_order_id: cjResult.cjOrderId,
+        cj_shipment_order_id: cjResult.shipmentOrderId,
+        cj_pay_id: cjResult.payId,
+        cj_order_amount_usd: amountUsd > 0 ? amountUsd : orderTotalUsd ?? null,
+        cj_payment_status: "unpaid",
         fulfillment_note: null,
       })
       .eq("id", orderId);
+
+    await tryAutoPayCjOrder(orderId);
     return;
   }
 
@@ -188,6 +202,7 @@ export async function applyCJFulfillmentResult(
     .update({
       status: "paid_fulfillment_pending",
       fulfillment_note: cjResult.error,
+      cj_payment_status: "not_required",
     })
     .eq("id", orderId);
 }
@@ -254,7 +269,7 @@ export async function fulfillOrder(params: {
     })),
   });
 
-  await applyCJFulfillmentResult(orderId as string, cjResult);
+  await applyCJFulfillmentResult(orderId as string, cjResult, total);
 
   await deletePendingCheckout(params.paypalOrderId);
   return { orderId: orderId as string };

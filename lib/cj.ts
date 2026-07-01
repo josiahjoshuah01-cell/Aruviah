@@ -49,7 +49,13 @@ export type CJOrderInput = {
 };
 
 export type CJOrderResult =
-  | { success: true; cjOrderId: string }
+  | {
+      success: true;
+      cjOrderId: string;
+      shipmentOrderId: string | null;
+      payId: string | null;
+      orderAmountUsd: number;
+    }
   | { success: false; error: string }
   | { skipped: true; reason: "unmapped_sku"; unmappedSkus: string[] }
   | { skipped: true; reason: "no_credentials" };
@@ -80,6 +86,10 @@ type CJAccessTokenData = {
 type CJCreateOrderData = {
   orderId?: string;
   orderNumber?: string;
+  shipmentOrderId?: string;
+  payId?: string;
+  orderAmount?: string | number;
+  actualPayment?: string | number;
 };
 
 let tokenCache: CJTokenCache | null = null;
@@ -394,7 +404,6 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
       };
     }
 
-    // createOrderV2 success response shape not specified in our docs — try known id fields.
     const cjOrderId = body.data?.orderId ?? body.data?.orderNumber;
     if (!cjOrderId) {
       console.error(
@@ -404,10 +413,23 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
       return { success: false, error: "CJ response missing order id" };
     }
 
+    const shipmentOrderId = body.data?.shipmentOrderId?.trim() || null;
+    const payId = body.data?.payId?.trim() || null;
+    const amountUsd =
+      parseFloat(String(body.data?.actualPayment ?? "")) ||
+      parseFloat(String(body.data?.orderAmount ?? "")) ||
+      0;
+
     console.log(
-      `[CJ] Order created: aruviah=${order.orderId} cj=${cjOrderId}`
+      `[CJ] Order created: aruviah=${order.orderId} cj=${cjOrderId} shipment=${shipmentOrderId ?? "—"}`
     );
-    return { success: true, cjOrderId };
+    return {
+      success: true,
+      cjOrderId,
+      shipmentOrderId,
+      payId,
+      orderAmountUsd: Math.round(amountUsd * 100) / 100,
+    };
   } catch (err) {
     console.error("[CJ] createOrderV2 request error:", err);
     return {

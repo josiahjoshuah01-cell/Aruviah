@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
+import { CjPaymentNotice, CjPaymentStatusBadge } from "@/components/admin/cj-payment-notice";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { updateOrderStatusAction } from "@/app/admin/orders/actions";
@@ -105,9 +106,27 @@ export function OrderDetailPanel({ order }: { order: AdminOrderDetail }) {
                 <dd className="mt-1 text-xs">{order.fulfillment_note}</dd>
               </div>
             )}
+            <div>
+              <dt className="text-muted-foreground">CJ payment</dt>
+              <dd className="mt-1">
+                <CjPaymentStatusBadge status={order.cj_payment_status} />
+                {order.cj_payment_status === "not_required" && (
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    N/A
+                  </span>
+                )}
+              </dd>
+            </div>
           </dl>
         </section>
       </div>
+
+      <CjPaymentNotice
+        cjOrderId={order.cj_order_id}
+        shipmentOrderId={order.cj_shipment_order_id}
+        paymentStatus={order.cj_payment_status}
+        amountUsd={order.cj_order_amount_usd}
+      />
 
       <section className="rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">

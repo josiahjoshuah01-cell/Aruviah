@@ -254,9 +254,8 @@ export function StagedReviewList({
   if (items.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
-        No pending staged products. Run{" "}
-        <code className="text-sm">npm run cj:search -- &quot;keyword&quot; slug</code>{" "}
-        to stage items from CJ.
+        No pending staged products. Use the search form above to stage items from
+        CJ.
       </p>
     );
   }

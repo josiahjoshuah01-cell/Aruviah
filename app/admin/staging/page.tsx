@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { CjLookupForm } from "@/components/admin/cj-lookup-form";
+import { CjSearchForm } from "@/components/admin/cj-search-form";
 import { StagedReviewList } from "@/components/admin/staged-item-review";
 import { createServiceClient } from "@/lib/supabase/admin";
 import {
@@ -51,6 +53,10 @@ export default async function AdminStagingPage() {
           Preview real catalog components before publishing to the live store.
         </p>
       </header>
+      <div className="space-y-4">
+        <CjSearchForm categories={categories ?? []} />
+        <CjLookupForm categories={categories ?? []} />
+      </div>
       <StagedReviewList items={items} categories={categories ?? []} />
     </div>
   );

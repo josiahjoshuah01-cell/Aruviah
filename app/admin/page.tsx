@@ -44,6 +44,18 @@ export default async function AdminOverviewPage() {
           </p>
         </Link>
         <Link
+          href="/admin/settings"
+          className="rounded-lg border border-border bg-card p-4 shadow-sm transition-colors hover:border-stream/40"
+        >
+          <p className="text-sm text-muted-foreground">CJ payment due</p>
+          <p className="mt-1 font-display text-3xl font-bold tabular-nums">
+            {badges.cjUnpaidCount}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Orders created on CJ, awaiting wallet payment
+          </p>
+        </Link>
+        <Link
           href="/admin/orders"
           className="rounded-lg border border-border bg-card p-4 shadow-sm transition-colors hover:border-stream/40"
         >
