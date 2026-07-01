@@ -11,6 +11,7 @@ import {
   resolveColorSwatchFill,
   type SerializableVariant,
 } from "@/lib/variant-utils";
+import { formatEstimatedDelivery } from "@/lib/cj-shipping-origin";
 
 type VariantSelectorProps = {
   productId: string;
@@ -18,6 +19,7 @@ type VariantSelectorProps = {
   coverImage: string | null;
   soldCount: number;
   variants: SerializableVariant[];
+  preview?: boolean;
 };
 
 function uniqueValues(values: (string | null)[]): string[] {
@@ -49,6 +51,7 @@ export function VariantSelector({
   coverImage,
   soldCount,
   variants,
+  preview = false,
 }: VariantSelectorProps) {
   const addItem = useCartStore((s) => s.addItem);
   const [pulsing, setPulsing] = useState(false);
@@ -78,6 +81,10 @@ export function VariantSelector({
     selectedVariant.stock > 0 &&
     selectedVariant.stock < 10;
   const outOfStock = !selectedVariant || selectedVariant.stock <= 0;
+
+  const deliveryLine = selectedVariant
+    ? formatEstimatedDelivery(selectedVariant.ships_from_country ?? null)
+    : null;
 
   const variantSectionTitle =
     realColorLabels.length > 0 ? "Color" : "Variant";
@@ -161,6 +168,16 @@ export function VariantSelector({
             {selectedVariant.shipping_cost_usd > 0 && (
               <p className="text-sm text-muted-foreground">
                 + {formatPrice(selectedVariant.shipping_cost_usd)} shipping
+              </p>
+            )}
+            {deliveryLine && (
+              <p className="text-sm text-muted-foreground">
+                {deliveryLine}
+                {selectedVariant.is_fast_shipping && (
+                  <span className="ml-2 inline-flex rounded bg-stream/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-stream">
+                    Fast
+                  </span>
+                )}
               </p>
             )}
           </>
@@ -341,16 +358,24 @@ export function VariantSelector({
         )}
 
         <div className="relative mt-2">
-          <Button
-            onClick={handleAdd}
-            disabled={outOfStock}
-            className="w-full"
-            size="lg"
-          >
-            {outOfStock ? "Out of stock" : "Add to cart"}
-          </Button>
-          {pulsing && (
-            <span className="current-underline current-underline--pulse" />
+          {preview ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Preview only — add to cart disabled
+            </p>
+          ) : (
+            <>
+              <Button
+                onClick={handleAdd}
+                disabled={outOfStock}
+                className="w-full"
+                size="lg"
+              >
+                {outOfStock ? "Out of stock" : "Add to cart"}
+              </Button>
+              {pulsing && (
+                <span className="current-underline current-underline--pulse" />
+              )}
+            </>
           )}
         </div>
       </div>

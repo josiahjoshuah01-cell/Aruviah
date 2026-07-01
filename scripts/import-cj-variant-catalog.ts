@@ -314,7 +314,15 @@ async function backfillVariantLabels(
   if (error) throw error;
   let updated = 0;
 
-  for (const row of rows ?? []) {
+  const variantRows = (rows ?? []) as Array<{
+    id: string;
+    sku: string;
+    cj_variant_id: string | null;
+    color: string | null;
+    size: string | null;
+  }>;
+
+  for (const row of variantRows) {
     if (!row.cj_variant_id) continue;
     await sleep(150);
     const vidUrl = `${CJ_API_BASE}/product/variant/queryByVid?vid=${encodeURIComponent(row.cj_variant_id)}&features=enable_inventory`;

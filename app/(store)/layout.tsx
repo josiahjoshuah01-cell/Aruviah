@@ -1,6 +1,7 @@
 import { Header } from "@/components/store/header";
 import { CategoryRail } from "@/components/store/category-rail";
 import { getCategoriesForNav } from "@/lib/queries";
+import { getSessionInfo } from "@/lib/admin-auth";
 import { Suspense } from "react";
 
 export default async function StoreLayout({
@@ -8,11 +9,14 @@ export default async function StoreLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const categories = await getCategoriesForNav();
+  const [categories, session] = await Promise.all([
+    getCategoriesForNav(),
+    getSessionInfo(),
+  ]);
 
   return (
     <div className="min-h-screen bg-mist">
-      <Header />
+      <Header isAdmin={session.isAdmin} isLoggedIn={session.isLoggedIn} />
       <Suspense fallback={null}>
         <CategoryRail categories={categories} />
       </Suspense>

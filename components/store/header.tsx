@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ClipboardList, ShoppingBag } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/store/search-bar";
 import { CartDrawer } from "@/components/store/cart-drawer";
+import { createClient } from "@/lib/supabase/client";
 import { useCartStore, selectCartTotalItems } from "@/lib/cart-store";
 import { Suspense, useEffect, useState } from "react";
 
-export function Header() {
+type HeaderProps = {
+  isAdmin?: boolean;
+  isLoggedIn?: boolean;
+};
+
+export function Header({ isAdmin = false, isLoggedIn = false }: HeaderProps) {
+  const router = useRouter();
   const totalItems = useCartStore(selectCartTotalItems);
   const [mounted, setMounted] = useState(false);
 
@@ -16,6 +24,12 @@ export function Header() {
 
   const displayCount = mounted ? totalItems : 0;
 
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-mist/95 backdrop-blur supports-[backdrop-filter]:bg-mist/80">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:gap-6 md:px-6">
@@ -51,12 +65,32 @@ export function Header() {
           >
             Orders
           </Link>
-          <Link
-            href="/login"
-            className="hidden text-sm text-muted-foreground hover:text-current sm:inline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream rounded px-2 py-1"
-          >
-            Sign in
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/admin/staging"
+              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-stream hover:text-stream/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
+              title="Admin staging"
+            >
+              <ClipboardList className="h-4 w-4" />
+              <span className="hidden sm:inline">Staging</span>
+            </Link>
+          )}
+          {isLoggedIn ? (
+            <button
+              type="button"
+              onClick={signOut}
+              className="hidden text-sm text-muted-foreground hover:text-current sm:inline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream rounded px-2 py-1"
+            >
+              Sign out
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden text-sm text-muted-foreground hover:text-current sm:inline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream rounded px-2 py-1"
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </div>
     </header>

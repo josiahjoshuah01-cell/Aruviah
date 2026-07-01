@@ -3,14 +3,17 @@ import Link from "next/link";
 import { formatPrice, formatSoldCount } from "@/lib/utils";
 import type { Product } from "@/lib/types";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  preview = false,
+}: {
+  product: Product;
+  preview?: boolean;
+}) {
   const lowStock = product.stock > 0 && product.stock < 10;
 
-  return (
-    <Link
-      href={`/product/${product.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
-    >
+  const inner = (
+    <>
       <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
         {product.image_url ? (
           <Image
@@ -44,6 +47,23 @@ export function ProductCard({ product }: { product: Product }) {
           </p>
         )}
       </div>
+    </>
+  );
+
+  if (preview) {
+    return (
+      <div className="group relative flex flex-col overflow-hidden rounded-lg">
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={`/product/${product.id}`}
+      className="group relative flex flex-col overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
+    >
+      {inner}
     </Link>
   );
 }

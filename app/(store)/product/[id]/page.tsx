@@ -45,6 +45,8 @@ export default async function ProductPage({
     shipping_cost_usd: v.shipping_cost_usd,
     stock: v.stock,
     image_url: v.image_url,
+    ships_from_country: v.ships_from_country,
+    is_fast_shipping: v.is_fast_shipping,
   }));
 
   return (

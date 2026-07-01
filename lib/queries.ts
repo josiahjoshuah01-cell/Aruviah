@@ -40,6 +40,8 @@ type ProductRow = {
     image_url: string | null;
     is_active: boolean;
     created_at: string;
+    ships_from_country: string | null;
+    is_fast_shipping: boolean | null;
   }>;
 };
 
@@ -90,7 +92,9 @@ const PRODUCT_SELECT = `
     stock,
     image_url,
     is_active,
-    created_at
+    created_at,
+    ships_from_country,
+    is_fast_shipping
   )
 `;
 
@@ -111,6 +115,8 @@ function mapVariantRow(
     image_url: v.image_url,
     is_active: v.is_active,
     created_at: v.created_at,
+    ships_from_country: v.ships_from_country ?? null,
+    is_fast_shipping: v.is_fast_shipping ?? false,
   };
 }
 

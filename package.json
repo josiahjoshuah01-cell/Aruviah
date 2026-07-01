@@ -11,7 +11,9 @@
     "import:cj": "tsx scripts/import-cj-catalog.ts",
     "import:cj-variants": "tsx scripts/import-cj-variant-catalog.ts",
     "import:cj-variants:fill": "tsx scripts/import-cj-variant-catalog.ts --only=beauty,sports",
-    "import:cj-categories": "tsx scripts/import-cj-categories.ts"
+    "import:cj-categories": "tsx scripts/import-cj-categories.ts",
+    "cj:search": "tsx scripts/cj-search.ts",
+    "cj:shipping-probe": "tsx scripts/cj-shipping-probe.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

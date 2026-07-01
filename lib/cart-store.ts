@@ -61,6 +61,20 @@ export const useCartStore = create<CartState>()(
       },
       clearCart: () => set({ items: [] }),
     }),
-    { name: "aruviah-cart" }
+    {
+      name: "aruviah-cart",
+      version: 1,
+      migrate: (persisted) => {
+        const state = persisted as CartState | undefined;
+        if (!state?.items) return state ?? { items: [] };
+        return {
+          ...state,
+          items: state.items.filter(
+            (item) =>
+              typeof item.variantId === "string" && item.variantId.length > 0
+          ),
+        };
+      },
+    }
   )
 );

@@ -64,4 +64,6 @@ export type SerializableVariant = {
   shipping_cost_usd: number;
   stock: number;
   image_url: string | null;
+  ships_from_country?: string | null;
+  is_fast_shipping?: boolean;
 };

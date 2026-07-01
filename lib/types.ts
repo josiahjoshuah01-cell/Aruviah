@@ -19,6 +19,8 @@ export type ProductVariant = {
   image_url: string | null;
   is_active: boolean;
   created_at: string;
+  ships_from_country: string | null;
+  is_fast_shipping: boolean;
 };
 
 /** Listing-level product; price/stock/sku come from default active variant. */
