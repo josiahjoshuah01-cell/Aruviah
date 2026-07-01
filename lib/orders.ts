@@ -212,9 +212,14 @@ export async function fulfillOrder(params: {
     return { error: "Failed to create order" };
   }
 
+  const { data: authUser } = await supabase.auth.admin.getUserById(
+    params.userId
+  );
+
   const cjResult = await createCJOrder({
     orderId: orderId as string,
     shipping: params.shipping,
+    email: authUser?.user?.email,
     items: items.map((i) => ({
       productId: i.productId,
       sku: i.sku,

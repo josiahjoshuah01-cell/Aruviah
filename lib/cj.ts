@@ -1,22 +1,29 @@
 /**
  * CJ Dropshipping API 2.0 — fulfillment only.
  *
- * Auth (verified against official docs, Mar 2026):
- *   POST https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken
+ * Auth (confirmed current CJ docs):
+ *   POST /api2.0/v1/authentication/getAccessToken
  *   Body: { "apiKey": "<CJ_API_KEY>" }
- *   Header: Content-Type: application/json
+ *   Response data: accessToken, accessTokenExpiryDate, refreshToken, refreshTokenExpiryDate
  *
- * Create order (verified):
- *   POST https://developers.cjdropshipping.com/api2.0/v1/shopping/order/createOrderV3
- *   Header: CJ-Access-Token, Content-Type: application/json
+ * Refresh:
+ *   POST /api2.0/v1/authentication/refreshAccessToken
+ *   Body: { "refreshToken": "..." }
  *
- * CJ_EMAIL is required in env for configuration validation (account identity).
- * The auth endpoint uses apiKey only per current CJ API 2.0 docs.
+ * Create order:
+ *   POST /api2.0/v1/shopping/order/createOrderV2
+ *   Header: CJ-Access-Token
+ *
+ * Auth is apiKey-only (no email/password flow). CJ_EMAIL is optional — used as
+ * order email fallback when customer email is not available.
  */
 
 import { createServiceClient } from "@/lib/supabase/admin";
 
 const CJ_API_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
+
+/** CJ server-side token cache window — do not re-auth more than once per day. */
+const CJ_SERVER_CACHE_MS = 24 * 60 * 60 * 1000;
 
 export type CJOrderItem = {
   productId: string;
@@ -37,6 +44,8 @@ export type CJOrderInput = {
   orderId: string;
   shipping: CJShipping;
   items: CJOrderItem[];
+  /** Customer email for createOrderV2 — falls back to CJ_EMAIL env if omitted. */
+  email?: string;
 };
 
 export type CJOrderResult =
@@ -46,8 +55,11 @@ export type CJOrderResult =
   | { skipped: true; reason: "no_credentials" };
 
 type CJTokenCache = {
-  token: string;
-  expiresAtMs: number;
+  accessToken: string;
+  accessTokenExpiryDate: string;
+  refreshToken: string;
+  refreshTokenExpiryDate: string;
+  fetchedAt: number;
 };
 
 type CJApiEnvelope<T> = {
@@ -61,12 +73,13 @@ type CJApiEnvelope<T> = {
 type CJAccessTokenData = {
   accessToken: string;
   accessTokenExpiryDate: string;
+  refreshToken: string;
+  refreshTokenExpiryDate: string;
 };
 
 type CJCreateOrderData = {
   orderId?: string;
   orderNumber?: string;
-  shipmentOrderId?: string;
 };
 
 let tokenCache: CJTokenCache | null = null;
@@ -82,13 +95,25 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   france: "FR",
 };
 
-function hasCredentials(): boolean {
-  return !!(process.env.CJ_EMAIL && process.env.CJ_API_KEY);
+function hasApiKey(): boolean {
+  return !!process.env.CJ_API_KEY?.trim();
 }
 
 function parseExpiryMs(isoDate: string): number {
   const ms = Date.parse(isoDate);
-  return Number.isNaN(ms) ? Date.now() + 14 * 24 * 60 * 60 * 1000 : ms;
+  return Number.isNaN(ms) ? 0 : ms;
+}
+
+function isAccessTokenValid(cache: CJTokenCache): boolean {
+  return parseExpiryMs(cache.accessTokenExpiryDate) > Date.now();
+}
+
+function isRefreshTokenValid(cache: CJTokenCache): boolean {
+  return parseExpiryMs(cache.refreshTokenExpiryDate) > Date.now();
+}
+
+function isWithinCJServerCacheWindow(cache: CJTokenCache): boolean {
+  return Date.now() - cache.fetchedAt < CJ_SERVER_CACHE_MS;
 }
 
 function toCountryCode(country: string): string {
@@ -99,17 +124,27 @@ function toCountryCode(country: string): string {
   return trimmed.slice(0, 2).toUpperCase();
 }
 
+function applyTokenData(data: CJAccessTokenData): string {
+  tokenCache = {
+    accessToken: data.accessToken,
+    accessTokenExpiryDate: data.accessTokenExpiryDate,
+    refreshToken: data.refreshToken,
+    refreshTokenExpiryDate: data.refreshTokenExpiryDate,
+    fetchedAt: Date.now(),
+  };
+  return tokenCache.accessToken;
+}
+
+/**
+ * Full apiKey auth — POST /authentication/getAccessToken.
+ * Updates module cache with access + refresh tokens.
+ */
 export async function getCJToken(): Promise<string | null> {
-  if (!hasCredentials()) {
+  if (!hasApiKey()) {
     console.warn(
-      "[CJ] Missing CJ_EMAIL or CJ_API_KEY — skipping token fetch (fulfillment disabled)."
+      "[CJ] Missing CJ_API_KEY — skipping token fetch (fulfillment disabled)."
     );
     return null;
-  }
-
-  const now = Date.now();
-  if (tokenCache && tokenCache.expiresAtMs > now + 60_000) {
-    return tokenCache.token;
   }
 
   try {
@@ -123,25 +158,74 @@ export async function getCJToken(): Promise<string | null> {
 
     if (!res.ok || body.code !== 200 || !body.result || !body.data?.accessToken) {
       console.error(
-        "[CJ] Auth failed:",
+        "[CJ] getAccessToken failed:",
         JSON.stringify({ status: res.status, code: body.code, message: body.message })
       );
       return null;
     }
 
-    const expiresAtMs =
-      parseExpiryMs(body.data.accessTokenExpiryDate) - 5 * 60 * 1000;
-
-    tokenCache = {
-      token: body.data.accessToken,
-      expiresAtMs,
-    };
-
-    return tokenCache.token;
+    return applyTokenData(body.data);
   } catch (err) {
-    console.error("[CJ] Auth request error:", err);
+    console.error("[CJ] getAccessToken request error:", err);
     return null;
   }
+}
+
+/**
+ * Refresh auth — POST /authentication/refreshAccessToken.
+ * Requires a cached refreshToken from a prior getCJToken() call.
+ */
+export async function refreshCJToken(): Promise<string | null> {
+  if (!tokenCache?.refreshToken) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(`${CJ_API_BASE}/authentication/refreshAccessToken`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: tokenCache.refreshToken }),
+    });
+
+    const body = (await res.json()) as CJApiEnvelope<CJAccessTokenData>;
+
+    if (!res.ok || body.code !== 200 || !body.result || !body.data?.accessToken) {
+      console.error(
+        "[CJ] refreshAccessToken failed:",
+        JSON.stringify({ status: res.status, code: body.code, message: body.message })
+      );
+      return null;
+    }
+
+    return applyTokenData(body.data);
+  } catch (err) {
+    console.error("[CJ] refreshAccessToken request error:", err);
+    return null;
+  }
+}
+
+async function resolveCJAccessToken(): Promise<string | null> {
+  if (!hasApiKey()) {
+    return null;
+  }
+
+  if (tokenCache) {
+    if (isWithinCJServerCacheWindow(tokenCache) && isAccessTokenValid(tokenCache)) {
+      return tokenCache.accessToken;
+    }
+
+    if (isRefreshTokenValid(tokenCache)) {
+      const refreshed = await refreshCJToken();
+      if (refreshed) return refreshed;
+    }
+  }
+
+  return getCJToken();
+}
+
+/** Shared CJ API auth — respects 24h cache + refresh token flow. */
+export async function getCJAccessToken(): Promise<string | null> {
+  return resolveCJAccessToken();
 }
 
 type ProductCJMapping = {
@@ -170,51 +254,70 @@ async function loadCJMappings(
   return new Map(data.map((p) => [p.id, p]));
 }
 
+async function loadOrderLineItemIds(
+  orderId: string
+): Promise<Map<string, string>> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("order_items")
+    .select("id, product_id")
+    .eq("order_id", orderId);
+
+  if (error || !data) {
+    console.error("[CJ] Failed to load order line items:", error);
+    return new Map();
+  }
+
+  return new Map(data.map((row) => [row.product_id, row.id]));
+}
+
 function buildCreateOrderPayload(
   order: CJOrderInput,
-  mappings: Map<string, ProductCJMapping>
+  mappings: Map<string, ProductCJMapping>,
+  lineItemIds: Map<string, string>
 ) {
   const { shipping } = order;
   const countryCode = toCountryCode(shipping.country);
   const logisticName =
-    process.env.CJ_LOGISTIC_NAME?.trim() || "CJPacket Ordinary";
+    process.env.CJ_LOGISTIC_NAME?.trim() || "PostNL";
+  const email =
+    order.email?.trim() || process.env.CJ_EMAIL?.trim() || "";
 
   return {
     orderNumber: order.orderId,
     shippingZip: "",
     shippingCountry: shipping.country,
     shippingCountryCode: countryCode,
-    shippingProvince: shipping.city,
+    shippingProvince: "",
     shippingCity: shipping.city,
     shippingCounty: "",
     shippingPhone: shipping.phone,
     shippingCustomerName: `${shipping.firstName} ${shipping.lastName}`.trim(),
     shippingAddress: shipping.address,
     shippingAddress2: "",
-    houseNumber: "",
-    remark: `Aruviah order ${order.orderId}`,
-    email: process.env.CJ_EMAIL ?? "",
-    platform: "Api",
-    fromCountryCode: process.env.CJ_FROM_COUNTRY_CODE?.trim() || "CN",
+    remark: "",
+    email,
     logisticName,
-    shopLogisticsType: 2,
+    fromCountryCode: process.env.CJ_FROM_COUNTRY_CODE?.trim() || "CN",
+    platform: "shopify",
     orderFlow: 1,
     products: order.items.map((item) => {
       const mapped = mappings.get(item.productId)!;
+      const storeLineItemId =
+        lineItemIds.get(item.productId) ?? `${order.orderId}-${item.productId}`;
       return {
         vid: mapped.cj_variant_id,
         quantity: item.qty,
-        storeLineItemId: `${order.orderId}-${item.productId}`,
-        storeProductId: mapped.cj_product_id ?? undefined,
+        storeLineItemId,
       };
     }),
   };
 }
 
 export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult> {
-  if (!hasCredentials()) {
+  if (!hasApiKey()) {
     console.warn(
-      "[CJ] Missing CJ_EMAIL or CJ_API_KEY — cannot fulfill order",
+      "[CJ] Missing CJ_API_KEY — cannot fulfill order",
       order.orderId
     );
     return { skipped: true, reason: "no_credentials" };
@@ -241,18 +344,19 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
     };
   }
 
-  const token = await getCJToken();
+  const token = await resolveCJAccessToken();
   if (!token) {
     return {
       success: false,
-      error: "CJ authentication failed — check CJ_API_KEY and CJ_EMAIL env vars",
+      error: "CJ authentication failed — check CJ_API_KEY env var",
     };
   }
 
-  const payload = buildCreateOrderPayload(order, mappings);
+  const lineItemIds = await loadOrderLineItemIds(order.orderId);
+  const payload = buildCreateOrderPayload(order, mappings, lineItemIds);
 
   try {
-    const res = await fetch(`${CJ_API_BASE}/shopping/order/createOrderV3`, {
+    const res = await fetch(`${CJ_API_BASE}/shopping/order/createOrderV2`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -265,7 +369,7 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
 
     if (!res.ok || body.code !== 200 || !body.result) {
       console.error(
-        "[CJ] createOrderV3 failed:",
+        "[CJ] createOrderV2 failed:",
         JSON.stringify({
           httpStatus: res.status,
           code: body.code,
@@ -280,10 +384,14 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
       };
     }
 
-    const cjOrderId = body.data?.orderId;
+    // createOrderV2 success response shape not specified in our docs — try known id fields.
+    const cjOrderId = body.data?.orderId ?? body.data?.orderNumber;
     if (!cjOrderId) {
-      console.error("[CJ] createOrderV3 succeeded but no orderId in response:", body);
-      return { success: false, error: "CJ response missing orderId" };
+      console.error(
+        "[CJ] createOrderV2 succeeded but response missing order id fields:",
+        body
+      );
+      return { success: false, error: "CJ response missing order id" };
     }
 
     console.log(
@@ -291,7 +399,7 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
     );
     return { success: true, cjOrderId };
   } catch (err) {
-    console.error("[CJ] createOrderV3 request error:", err);
+    console.error("[CJ] createOrderV2 request error:", err);
     return {
       success: false,
       error: err instanceof Error ? err.message : "Unknown CJ API error",

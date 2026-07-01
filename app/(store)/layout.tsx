@@ -1,6 +1,6 @@
 import { Header } from "@/components/store/header";
 import { CategoryRail } from "@/components/store/category-rail";
-import { getCategories } from "@/lib/queries";
+import { getCategoriesForNav } from "@/lib/queries";
 import { Suspense } from "react";
 
 export default async function StoreLayout({
@@ -8,7 +8,7 @@ export default async function StoreLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const categories = await getCategories();
+  const categories = await getCategoriesForNav();
 
   return (
     <div className="min-h-screen bg-mist">

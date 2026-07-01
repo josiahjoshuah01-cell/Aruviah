@@ -1,0 +1,146 @@
+{
+  "leaf_count": 540,
+  "inserted": 0,
+  "updated": 517,
+  "flagged_near_duplicates": [
+    {
+      "cj_category_id": "2410110339311602900",
+      "cj_name": "Pet Chase Toys",
+      "matched_existing": "Toys",
+      "reason": "name substring overlap (\"toys\" ↔ \"pet chase toys\")"
+    },
+    {
+      "cj_category_id": "2410110339451623300",
+      "cj_name": "Pet Chew Toys",
+      "matched_existing": "Toys",
+      "reason": "name substring overlap (\"toys\" ↔ \"pet chew toys\")"
+    },
+    {
+      "cj_category_id": "2410110340031614900",
+      "cj_name": "Pet Training and Educational Toys",
+      "matched_existing": "Toys",
+      "reason": "name substring overlap (\"toys\" ↔ \"pet training and educational toys\")"
+    },
+    {
+      "cj_category_id": "2410110340161623400",
+      "cj_name": "Pet Sound Toys",
+      "matched_existing": "Toys",
+      "reason": "name substring overlap (\"toys\" ↔ \"pet sound toys\")"
+    },
+    {
+      "cj_category_id": "2410110340291603400",
+      "cj_name": "Pet Tunnel Toys",
+      "matched_existing": "Toys",
+      "reason": "name substring overlap (\"toys\" ↔ \"pet tunnel toys\")"
+    },
+    {
+      "cj_category_id": "2410110340531618900",
+      "cj_name": "Pet Plush Toys",
+      "matched_existing": "Toys",
+      "reason": "name substring overlap (\"toys\" ↔ \"pet plush toys\")"
+    },
+    {
+      "cj_category_id": "2410110344291609800",
+      "cj_name": "Bird Toys",
+      "matched_existing": "Toys",
+      "reason": "name substring overlap (\"toys\" ↔ \"bird toys\")"
+    },
+    {
+      "cj_category_id": "23ADD7CB-065A-4A02-B8E8-43D3F041B90B",
+      "cj_name": "Kitchen Knives & Accessories",
+      "matched_existing": "Kitchen",
+      "reason": "name substring overlap (\"kitchen\" ↔ \"kitchen knives & accessories\")"
+    },
+    {
+      "cj_category_id": "56845C3D-4D9E-4729-B5D4-6D7DE310C031",
+      "cj_name": "Kitchen Storage",
+      "matched_existing": "Kitchen",
+      "reason": "name substring overlap (\"kitchen\" ↔ \"kitchen storage\")"
+    },
+    {
+      "cj_category_id": "87CF251F-8D11-4DE0-A154-9694D9858EB3",
+      "cj_name": "Home Office Storage",
+      "matched_existing": "Home",
+      "reason": "name substring overlap (\"home\" ↔ \"home office storage\")"
+    },
+    {
+      "cj_category_id": "89D165E3-EF5F-461D-9DC9-D1041CECEF09",
+      "cj_name": "Fashion Jewelry Sets",
+      "matched_existing": "Fashion",
+      "reason": "name substring overlap (\"fashion\" ↔ \"fashion jewelry sets\")"
+    },
+    {
+      "cj_category_id": "BF68CA3E-F698-475E-A1AD-C8E4C44D7C8D",
+      "cj_name": "Men Sports Watches",
+      "matched_existing": "Sports",
+      "reason": "name substring overlap (\"sports\" ↔ \"men sports watches\")"
+    },
+    {
+      "cj_category_id": "9D78B3E3-99F4-4EDA-8C70-2F5B95061CAA",
+      "cj_name": "Women Sports Watches",
+      "matched_existing": "Sports",
+      "reason": "name substring overlap (\"sports\" ↔ \"women sports watches\")"
+    },
+    {
+      "cj_category_id": "78BCE010-8E22-416F-82E2-6E5C6AE0CECE",
+      "cj_name": "Fashion Backpacks",
+      "matched_existing": "Fashion",
+      "reason": "name substring overlap (\"fashion\" ↔ \"fashion backpacks\")"
+    },
+    {
+      "cj_category_id": "79F47CD1-F813-4B4D-8D21-2B35966FBA66",
+      "cj_name": "Sports Accessories",
+      "matched_existing": "Sports",
+      "reason": "name substring overlap (\"sports\" ↔ \"sports accessories\")"
+    },
+    {
+      "cj_category_id": "937A06CE-ECCC-4C7D-A270-B216DE612AC0",
+      "cj_name": "Sports Bags",
+      "matched_existing": "Sports",
+      "reason": "name substring overlap (\"sports\" ↔ \"sports bags\")"
+    },
+    {
+      "cj_category_id": "599DFE31-C6AD-42D2-93AA-762126BBA475",
+      "cj_name": "Home Electronic Accessories",
+      "matched_existing": "Home",
+      "reason": "name substring overlap (\"home\" ↔ \"home electronic accessories\")"
+    },
+    {
+      "cj_category_id": "D6C23AAE-B8EE-481C-9B61-34557971D45F",
+      "cj_name": "Home Audio & Video",
+      "matched_existing": "Home",
+      "reason": "name substring overlap (\"home\" ↔ \"home audio & video\")"
+    },
+    {
+      "cj_category_id": "36F73513-6A5A-445D-87F9-BF3D6629E649",
+      "cj_name": "Smart Home Appliances",
+      "matched_existing": "Home",
+      "reason": "name substring overlap (\"home\" ↔ \"smart home appliances\")"
+    },
+    {
+      "cj_category_id": "2601070550031612900",
+      "cj_name": "Home Improvement Materials",
+      "matched_existing": "Home",
+      "reason": "name substring overlap (\"home\" ↔ \"home improvement materials\")"
+    },
+    {
+      "cj_category_id": "CDB10A90-3D34-4396-99B2-919E7CAD4B53",
+      "cj_name": "Garden Tools",
+      "matched_existing": "Garden",
+      "reason": "name substring overlap (\"garden\" ↔ \"garden tools\")"
+    },
+    {
+      "cj_category_id": "4D91D172-D6D0-429E-AABC-6F3325A273A6",
+      "cj_name": "Home Appliance Parts",
+      "matched_existing": "Home",
+      "reason": "name substring overlap (\"home\" ↔ \"home appliance parts\")"
+    },
+    {
+      "cj_category_id": "A028998B-C8CF-4533-BBE4-E04FA244CDC6",
+      "cj_name": "Kitchen Appliances",
+      "matched_existing": "Kitchen",
+      "reason": "name substring overlap (\"kitchen\" ↔ \"kitchen appliances\")"
+    }
+  ],
+  "errors": []
+}

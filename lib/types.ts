@@ -3,6 +3,7 @@ export type Category = {
   name: string;
   slug: string;
   sort_order: number;
+  cj_category_id?: string | null;
 };
 
 export type Product = {

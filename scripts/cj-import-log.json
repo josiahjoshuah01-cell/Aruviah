@@ -1,0 +1,730 @@
+{
+  "step1_safety": {
+    "orders": 0,
+    "order_items": 0,
+    "products_total": 16,
+    "products_with_order_history": 0,
+    "products_without_order_history": 16,
+    "product_ids_with_orders": []
+  },
+  "api_calls": [
+    {
+      "endpoint": "POST /authentication/getAccessToken",
+      "request": "{\"apiKey\":\"[REDACTED]\"}",
+      "response": {
+        "code": 200,
+        "result": true,
+        "message": "Success"
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=bluetooth%20earbuds&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 195,
+        "firstPid": "2070159544046288898"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2070159544046288898&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2070159544046288898",
+        "variantCount": 1,
+        "firstVid": "2070159544226643970"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2070159544226643970&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2070159544226643970",
+        "variantSellPrice": 89.99
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=usb%20cable&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 1057,
+        "firstPid": "2069951801953529858"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2069951801953529858&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2069951801953529858",
+        "variantCount": 1,
+        "firstVid": "2069951802154856450"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2069951802154856450&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2069951802154856450",
+        "variantSellPrice": 11.4
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=phone%20holder&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 1050,
+        "firstPid": "2071433106753830913"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2071433106753830913&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2071433106753830913",
+        "variantCount": 1,
+        "firstVid": "2071433107051626498"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2071433107051626498&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2071433107051626498",
+        "variantSellPrice": 92.51
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=power%20bank&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 979,
+        "firstPid": "2069951801953529858"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2069660442039730177&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2069660442039730177",
+        "variantCount": 1,
+        "firstVid": "2069660442140393473"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2069660442140393473&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2069660442140393473",
+        "variantSellPrice": 53.1
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=throw%20blanket&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 254,
+        "firstPid": "2071444663545729025"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2071444663545729025&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2071444663545729025",
+        "variantCount": 4,
+        "firstVid": "2071444663717695489"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2071444663717695489&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2071444663717695489",
+        "variantSellPrice": 70.99
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=storage%20basket&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 6255,
+        "firstPid": "2071793273788203009"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2071793273788203009&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2071793273788203009",
+        "variantCount": 1,
+        "firstVid": "2071793273930809346"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2071793273930809346&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2071793273930809346",
+        "variantSellPrice": 66.48
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=wall%20clock&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 2251,
+        "firstPid": "2069685104656027649"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2069685104656027649&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2069685104656027649",
+        "variantCount": 1,
+        "firstVid": "2069685104853159938"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2069685104853159938&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2069685104853159938",
+        "variantSellPrice": 26.77
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=pillow%20case&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 994,
+        "firstPid": "2071850259660042241"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2071850259660042241&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2071850259660042241",
+        "variantCount": 1,
+        "firstVid": "2071850259903311873"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2071850259903311873&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2071850259903311873",
+        "variantSellPrice": 45.99
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=kitchen%20knife&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 3098,
+        "firstPid": "2071774535708209153"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2071774535708209153&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2071774535708209153",
+        "variantCount": 4,
+        "firstVid": "2071774536144416769"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2071774536144416769&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2071774536144416769",
+        "variantSellPrice": 35.16
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=coffee%20mug&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 1215,
+        "firstPid": "2071856839786532865"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2071856839786532865&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2071856839786532865",
+        "variantCount": 1,
+        "firstVid": "2071856840625393666"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2071856840625393666&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2071856840625393666",
+        "variantSellPrice": 37.02
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=cutting%20board&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 776,
+        "firstPid": "2071443976720465922"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2069328499104059393&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2069328499104059393",
+        "variantCount": 1,
+        "firstVid": "2069328499217305601"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2069328499217305601&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2069328499217305601",
+        "variantSellPrice": 36.86
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=spatula&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 25,
+        "firstPid": "2046132306310356993"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2046132306310356993&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2046132306310356993",
+        "variantCount": 1,
+        "firstVid": "2046132306452963330"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2046132306452963330&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2046132306452963330",
+        "variantSellPrice": 37.51
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=women%20t-shirt&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 2731,
+        "firstPid": "2071795698832404482"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2071795698832404482&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2071795698832404482",
+        "variantCount": 1,
+        "firstVid": "2071795699033731073"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2071795699033731073&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2071795699033731073",
+        "variantSellPrice": 66.48
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=hoodie&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 93,
+        "firstPid": "2602020449341611300"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2602020449341611300&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2602020449341611300",
+        "variantCount": 3,
+        "firstVid": "2602020449341612500"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2602020449341612500&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2602020449341612500",
+        "variantSellPrice": 6.27
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=crossbody%20bag&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 1572,
+        "firstPid": "2071796796571549697"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2071796796571549697&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2071796796571549697",
+        "variantCount": 2,
+        "firstVid": "2071796796735127554"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2071796796735127554&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2071796796735127554",
+        "variantSellPrice": 16.39
+      }
+    },
+    {
+      "endpoint": "GET /product/list",
+      "request": "/product/list?pageNum=1&pageSize=5&productNameEn=sunglasses&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "total": 17,
+        "firstPid": "2052305308210540546"
+      }
+    },
+    {
+      "endpoint": "GET /product/query",
+      "request": "/product/query?pid=2052305308210540546&countryCode=US",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "pid": "2052305308210540546",
+        "variantCount": 4,
+        "firstVid": "2052305308424450049"
+      }
+    },
+    {
+      "endpoint": "GET /product/variant/queryByVid",
+      "request": "/product/variant/queryByVid?vid=2052305308424450049&features=enable_inventory",
+      "response": {
+        "code": 200,
+        "message": "Success",
+        "vid": "2052305308424450049",
+        "variantSellPrice": 18.9
+      }
+    }
+  ],
+  "imported": [
+    {
+      "title": "Smart Scale For Body Weight, Body Pod Scale, 8-Electrode Body Composition Scale With BMI, Body Fat, Muscle Mass, Digital Bathroom Scale With Larger Platform, Bluetooth",
+      "price_usd": 179.98,
+      "cj_variant_id": "2070159544226643970",
+      "cj_product_id": "2070159544046288898",
+      "sku": "ARV-00137",
+      "category": "electronics",
+      "cj_cost_usd": 89.99,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "electronics",
+      "cj_category_name": "Home Improvement / Tools / Measurement & Analysis"
+    },
+    {
+      "title": "USB C Charger Block, Charger Block 24W PD Power Adapter",
+      "price_usd": 22.8,
+      "cj_variant_id": "2069951802154856450",
+      "cj_product_id": "2069951801953529858",
+      "sku": "ARV-00138",
+      "category": "electronics",
+      "cj_cost_usd": 11.4,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "electronics",
+      "cj_category_name": "Phones & Accessories / Mobile Phone Accessories / Chargers"
+    },
+    {
+      "title": "Outdoor Rocking Chairs, Foldable Reclining Zero Gravity Lounge Rocker With Pillow, Cup & Phone Holder, Combo Design With Folding Legs, Black",
+      "price_usd": 185.02,
+      "cj_variant_id": "2071433107051626498",
+      "cj_product_id": "2071433106753830913",
+      "sku": "ARV-00139",
+      "category": "electronics",
+      "cj_cost_usd": 92.51,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "electronics",
+      "cj_category_name": "Home, Garden & Furniture / Home Storage / Furniture"
+    },
+    {
+      "title": "Headlight Headlamp S Witch Black For Chrysler Dodge With Power Mirrors",
+      "price_usd": 106.2,
+      "cj_variant_id": "2069660442140393473",
+      "cj_product_id": "2069660442039730177",
+      "sku": "ARV-00140",
+      "category": "electronics",
+      "cj_cost_usd": 53.1,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "electronics",
+      "cj_category_name": "Automobiles & Motorcycles / Auto Replacement Parts / Other Replacement Parts"
+    },
+    {
+      "title": "Human Dog Bed - 63 In X 31.4 In X 9.5 In Washable Faux Fur Lounger For Adults & Pets, Cushion With Orthopedic Support, Includes Pillow & Blanket",
+      "price_usd": 141.98,
+      "cj_variant_id": "2071444663717695489",
+      "cj_product_id": "2071444663545729025",
+      "sku": "ARV-00141",
+      "category": "home",
+      "cj_cost_usd": 70.99,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "home",
+      "cj_category_name": "Pet Supplies / Pet Bedding / Pet Beds"
+    },
+    {
+      "title": "Gray Dash Mat Cover Compatible - 2007-2012 Santa Fe Center Storage On Dash",
+      "price_usd": 132.96,
+      "cj_variant_id": "2071793273930809346",
+      "cj_product_id": "2071793273788203009",
+      "sku": "ARV-00142",
+      "category": "home",
+      "cj_cost_usd": 66.48,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "home",
+      "cj_category_name": "Automobiles & Motorcycles / Auto Replacement Parts / Other Replacement Parts"
+    },
+    {
+      "title": "Cute Animal Shape Wall Hanging Hook Coat Hat Clothes Rack Hooks Decoration For Bathroom Bedroom",
+      "price_usd": 53.54,
+      "cj_variant_id": "2069685104853159938",
+      "cj_product_id": "2069685104656027649",
+      "sku": "ARV-00143",
+      "category": "home",
+      "cj_cost_usd": 26.77,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "home",
+      "cj_category_name": "Home, Garden & Furniture / Festive & Party Supplies / Decorative Flowers & Wreaths"
+    },
+    {
+      "title": "Elevated Dog Bed For Large Dogs XL, Raised Dog Bed Cot With Washable Pillow, Indoor & Outdoor Cooling Dog Bed Hammock, Heavy Duty Steel Frame Dog Bed With Breathable Teslin Mesh, Grey",
+      "price_usd": 91.98,
+      "cj_variant_id": "2071850259903311873",
+      "cj_product_id": "2071850259660042241",
+      "sku": "ARV-00144",
+      "category": "home",
+      "cj_cost_usd": 45.99,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "home",
+      "cj_category_name": "Pet Supplies / Pet Bedding / Pet Beds"
+    },
+    {
+      "title": "Manual Slow Cooker, Easy To Use Program-Free Kitchen Appliance, Great For Pot Roast And Chili",
+      "price_usd": 70.32,
+      "cj_variant_id": "2071774536144416769",
+      "cj_product_id": "2071774535708209153",
+      "sku": "ARV-00145",
+      "category": "kitchen",
+      "cj_cost_usd": 35.16,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "kitchen",
+      "cj_category_name": "Home, Garden & Furniture / Kitchen, Dining & Bar / Cooking Tools"
+    },
+    {
+      "title": "For T Oyota 2018-2022 Camry Sedan MUG Style Window Visors Rain Sun Guard Vent 4Pc",
+      "price_usd": 74.04,
+      "cj_variant_id": "2071856840625393666",
+      "cj_product_id": "2071856839786532865",
+      "sku": "ARV-00146",
+      "category": "kitchen",
+      "cj_cost_usd": 37.02,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "kitchen",
+      "cj_category_name": "Automobiles & Motorcycles / Auto Replacement Parts / Other Replacement Parts"
+    },
+    {
+      "title": "Vertical Lumber Cutting Guide For Chainsaw Portable Aluminum Alloy Wood Cutter Tool Accessories Wood Timber Milling Attachment",
+      "price_usd": 73.72,
+      "cj_variant_id": "2069328499217305601",
+      "cj_product_id": "2069328499104059393",
+      "sku": "ARV-00147",
+      "category": "kitchen",
+      "cj_cost_usd": 36.86,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "kitchen",
+      "cj_category_name": "Home Improvement / Tools / Tool Sets"
+    },
+    {
+      "title": "Electric Hot Pot Non-Stick Frying Pan Portable Rapid Noodles Cooker With Long Handle Steamer Spatula Dual Power Control Overheat Dry-Boil Protection For College Dorm Room Essential",
+      "price_usd": 75.02,
+      "cj_variant_id": "2046132306452963330",
+      "cj_product_id": "2046132306310356993",
+      "sku": "ARV-00148",
+      "category": "kitchen",
+      "cj_cost_usd": 37.51,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "kitchen",
+      "cj_category_name": "Home, Garden & Furniture / Kitchen, Dining & Bar / Cooking Tools"
+    },
+    {
+      "title": "Grey Carpet Dash Mat Compatible With T Oyota Camry 1992-1993 Dash Cover",
+      "price_usd": 132.96,
+      "cj_variant_id": "2071795699033731073",
+      "cj_product_id": "2071795698832404482",
+      "sku": "ARV-00149",
+      "category": "fashion",
+      "cj_cost_usd": 66.48,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "fashion",
+      "cj_category_name": "Automobiles & Motorcycles / Auto Replacement Parts / Other Replacement Parts"
+    },
+    {
+      "title": "Thickened Fleece-Lined Solid-Color Sporty Casual Hoodie Set",
+      "price_usd": 12.54,
+      "cj_variant_id": "2602020449341612500",
+      "cj_product_id": "2602020449341611300",
+      "sku": "ARV-00150",
+      "category": "fashion",
+      "cj_cost_usd": 6.27,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "fashion",
+      "cj_category_name": "Women's Clothing > Tops & Sets > Suits & Sets"
+    },
+    {
+      "title": "Women's Large-Capacity, Lightweight, Soft-Touch Marshmallow-Style Stand-Up Travel Cosmetic & Toiletry Bag With 4 Compartments And Zipper Closure",
+      "price_usd": 32.78,
+      "cj_variant_id": "2071796796735127554",
+      "cj_product_id": "2071796796571549697",
+      "sku": "ARV-00151",
+      "category": "fashion",
+      "cj_cost_usd": 16.39,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "fashion",
+      "cj_category_name": "Bags & Shoes / Women's Luggage & Bags / Clutches"
+    },
+    {
+      "title": "5in1 Sunglasses Travel Case Organizer Hangable, Eyeglasses Foldable Storage Organizer",
+      "price_usd": 37.8,
+      "cj_variant_id": "2052305308424450049",
+      "cj_product_id": "2052305308210540546",
+      "sku": "ARV-00152",
+      "category": "fashion",
+      "cj_cost_usd": 18.9,
+      "markup_multiplier": 2,
+      "stock_source": "placeholder_50",
+      "category_slug": "fashion",
+      "cj_category_name": "Home, Garden & Furniture / Home Storage / Storage Bags & Cases & Boxes"
+    }
+  ],
+  "deactivated": [],
+  "deleted_placeholder_count": 16,
+  "errors": []
+}

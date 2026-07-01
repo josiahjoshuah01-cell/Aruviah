@@ -22,6 +22,39 @@ export async function getCategories(): Promise<Category[]> {
   return data ?? [];
 }
 
+/** Categories that have at least one active product — for store nav rail. */
+export async function getCategoriesForNav(): Promise<Category[]> {
+  if (!hasSupabaseEnv()) return [];
+
+  const supabase = createAnonClient();
+  const { data: products, error: productsError } = await supabase
+    .from("products")
+    .select("category_id")
+    .eq("is_active", true)
+    .not("category_id", "is", null);
+
+  if (productsError) throw productsError;
+
+  const categoryIds = [
+    ...new Set(
+      (products ?? [])
+        .map((p) => p.category_id)
+        .filter((id): id is string => !!id)
+    ),
+  ];
+
+  if (categoryIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .in("id", categoryIds)
+    .order("sort_order", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   if (!hasSupabaseEnv()) return null;
 
