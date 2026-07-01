@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/cart-store";
 import { cn, formatPrice } from "@/lib/utils";
 import {
-  colorSwatchFill,
-  formatVariantLabel,
+  isRealColorName,
+  resolveColorSwatchFill,
   type SerializableVariant,
 } from "@/lib/variant-utils";
 
@@ -36,6 +36,13 @@ function findVariant(
   });
 }
 
+function variantForColorLabel(
+  variants: SerializableVariant[],
+  label: string
+): SerializableVariant | undefined {
+  return variants.find((v) => v.color === label);
+}
+
 export function VariantSelector({
   productId,
   productTitle,
@@ -46,7 +53,9 @@ export function VariantSelector({
   const addItem = useCartStore((s) => s.addItem);
   const [pulsing, setPulsing] = useState(false);
 
-  const colors = uniqueValues(variants.map((v) => v.color));
+  const colorLabels = uniqueValues(variants.map((v) => v.color));
+  const realColorLabels = colorLabels.filter(isRealColorName);
+  const imageVariantLabels = colorLabels.filter((c) => !isRealColorName(c));
   const sizes = uniqueValues(variants.map((v) => v.size));
 
   const initial = variants[0];
@@ -69,6 +78,9 @@ export function VariantSelector({
     selectedVariant.stock > 0 &&
     selectedVariant.stock < 10;
   const outOfStock = !selectedVariant || selectedVariant.stock <= 0;
+
+  const variantSectionTitle =
+    realColorLabels.length > 0 ? "Color" : "Variant";
 
   function isSizeAvailable(size: string): boolean {
     return variants.some(
@@ -118,14 +130,14 @@ export function VariantSelector({
   }
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
+    <div className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-start md:gap-8">
+      <div className="relative mx-auto aspect-square w-full max-w-xs overflow-hidden rounded-xl bg-muted sm:max-w-sm md:max-w-[22rem]">
         {displayImage ? (
           <Image
             src={displayImage}
             alt={productTitle}
             fill
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, 352px"
             className="object-cover"
             priority
           />
@@ -168,19 +180,20 @@ export function VariantSelector({
           </span>
         )}
 
-        {colors.length > 0 && (
+        {realColorLabels.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium">
               Color
-              {selectedColor && (
+              {selectedColor && isRealColorName(selectedColor) && (
                 <span className="ml-1 font-normal text-muted-foreground">
                   — {selectedColor}
                 </span>
               )}
             </p>
             <div className="flex flex-wrap gap-2">
-              {colors.map((color) => {
+              {realColorLabels.map((color) => {
                 const isSelected = selectedColor === color;
+                const fill = resolveColorSwatchFill(color);
                 return (
                   <button
                     key={color}
@@ -195,12 +208,85 @@ export function VariantSelector({
                         : "border-border hover:border-stream/50"
                     )}
                   >
-                    <span
-                      className="absolute inset-1 rounded-full border border-black/10 dark:border-white/15"
-                      style={{ backgroundColor: colorSwatchFill(color) }}
-                    />
+                    {fill && (
+                      <span
+                        className="absolute inset-1 rounded-full border border-black/10 dark:border-white/15"
+                        style={{ backgroundColor: fill }}
+                      />
+                    )}
                     {isSelected && (
                       <span className="current-underline current-underline--animate bottom-[-6px] h-0.5 w-[calc(100%+4px)] -translate-x-0.5" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {imageVariantLabels.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">
+              {variantSectionTitle}
+              {selectedColor && imageVariantLabels.includes(selectedColor) && (
+                <span className="ml-1 font-normal text-muted-foreground">
+                  — {selectedColor}
+                </span>
+              )}
+            </p>
+            <div className="flex flex-wrap gap-4">
+              {imageVariantLabels.map((label) => {
+                const isSelected = selectedColor === label;
+                const variant = variantForColorLabel(variants, label);
+                const thumbUrl =
+                  variant?.image_url ?? coverImage ?? null;
+
+                if (thumbUrl) {
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => handleColorSelect(label)}
+                      aria-label={`Variant ${label}`}
+                      aria-pressed={isSelected}
+                      className={cn(
+                        "relative h-28 w-28 shrink-0 overflow-hidden rounded-lg border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream focus-visible:ring-offset-2 focus-visible:ring-offset-mist sm:h-32 sm:w-32",
+                        isSelected
+                          ? "border-stream ring-2 ring-stream/30"
+                          : "border-border hover:border-stream/50"
+                      )}
+                    >
+                      <Image
+                        src={thumbUrl}
+                        alt={label}
+                        fill
+                        sizes="128px"
+                        className="object-cover"
+                      />
+                      {isSelected && (
+                        <span className="current-underline current-underline--animate bottom-[-6px] h-0.5 w-[calc(100%+4px)] -translate-x-0.5" />
+                      )}
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => handleColorSelect(label)}
+                    aria-label={`Variant ${label}`}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "relative rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream",
+                      isSelected
+                        ? "border-stream bg-stream/10 text-stream"
+                        : "border-border text-muted-foreground hover:border-stream/50 hover:text-current"
+                    )}
+                  >
+                    {label}
+                    {isSelected && (
+                      <span className="current-underline current-underline--animate" />
                     )}
                   </button>
                 );
@@ -267,15 +353,6 @@ export function VariantSelector({
             <span className="current-underline current-underline--pulse" />
           )}
         </div>
-
-        {selectedVariant && (
-          <p className="text-xs text-muted-foreground">
-            {formatVariantLabel(
-              selectedVariant.color,
-              selectedVariant.size
-            ) ?? "Standard"}
-          </p>
-        )}
       </div>
     </div>
   );
