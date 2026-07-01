@@ -44,8 +44,8 @@ export default async function AdminStagingPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
-      <header className="mb-8">
+    <div className="space-y-6">
+      <header>
         <h1 className="font-display text-2xl font-bold">CJ staging review</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Preview real catalog components before publishing to the live store.

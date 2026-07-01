@@ -22,6 +22,7 @@ import { formatPrice } from "@/lib/utils";
 import { formatVariantLabel } from "@/lib/variant-utils";
 import { shippingSchema, type ShippingAddress } from "@/lib/validations";
 import { createClient } from "@/lib/supabase/client";
+import { useVariantAvailability } from "@/hooks/use-variant-availability";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -30,7 +31,14 @@ export default function CheckoutPage() {
   const shipping = useCartStore(selectCartShipping);
   const totalPrice = useCartStore(selectCartTotalPrice);
   const clearCart = useCartStore((s) => s.clearCart);
+  const removeItem = useCartStore((s) => s.removeItem);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+
+  const variantIds = items.map((i) => i.variantId);
+  const { loaded, availability } = useVariantAvailability(variantIds, items.length > 0);
+  const hasUnavailable =
+    loaded &&
+    items.some((item) => !availability.get(item.variantId)?.available);
 
   const {
     register,
@@ -66,6 +74,37 @@ export default function CheckoutPage() {
         <Button asChild>
           <Link href="/">Continue shopping</Link>
         </Button>
+      </div>
+    );
+  }
+
+  if (loaded && hasUnavailable) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-mist px-4 text-center">
+        <p className="text-coral-pulse">
+          Some items in your cart are no longer available.
+        </p>
+        <p className="max-w-md text-sm text-muted-foreground">
+          A product may have been removed or deactivated. Remove unavailable
+          items from your cart to continue.
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {items
+            .filter((item) => !availability.get(item.variantId)?.available)
+            .map((item) => (
+              <Button
+                key={item.variantId}
+                variant="outline"
+                size="sm"
+                onClick={() => removeItem(item.variantId)}
+              >
+                Remove {item.title}
+              </Button>
+            ))}
+          <Button asChild variant="ghost">
+            <Link href="/">Back to shop</Link>
+          </Button>
+        </div>
       </div>
     );
   }

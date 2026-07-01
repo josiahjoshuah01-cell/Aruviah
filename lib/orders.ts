@@ -156,9 +156,16 @@ export async function applyCJFulfillmentResult(
   const supabase = createServiceClient();
 
   if ("skipped" in cjResult) {
+    const note =
+      cjResult.reason === "unmapped_sku"
+        ? `Unmapped SKU(s): ${cjResult.unmappedSkus.join(", ")}`
+        : "CJ credentials missing — fulfillment skipped.";
     await supabase
       .from("orders")
-      .update({ status: "paid_needs_manual_fulfillment" })
+      .update({
+        status: "paid_needs_manual_fulfillment",
+        fulfillment_note: note,
+      })
       .eq("id", orderId);
     return;
   }
@@ -166,7 +173,11 @@ export async function applyCJFulfillmentResult(
   if (cjResult.success) {
     await supabase
       .from("orders")
-      .update({ status: "paid", cj_order_id: cjResult.cjOrderId })
+      .update({
+        status: "paid",
+        cj_order_id: cjResult.cjOrderId,
+        fulfillment_note: null,
+      })
       .eq("id", orderId);
     return;
   }
@@ -174,7 +185,10 @@ export async function applyCJFulfillmentResult(
   console.error(`[CJ] Fulfillment error for order ${orderId}:`, cjResult.error);
   await supabase
     .from("orders")
-    .update({ status: "paid_fulfillment_pending" })
+    .update({
+      status: "paid_fulfillment_pending",
+      fulfillment_note: cjResult.error,
+    })
     .eq("id", orderId);
 }
 

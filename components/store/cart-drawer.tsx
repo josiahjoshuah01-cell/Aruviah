@@ -21,7 +21,7 @@ import {
 } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
 import { formatVariantLabel } from "@/lib/variant-utils";
-import { useVariantStock } from "@/hooks/use-variant-stock";
+import { useVariantAvailability } from "@/hooks/use-variant-availability";
 
 export function CartDrawer({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -33,7 +33,11 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
   const removeItem = useCartStore((s) => s.removeItem);
 
   const variantIds = items.map((i) => i.variantId);
-  const liveStock = useVariantStock(variantIds, open);
+  const { loaded, availability } = useVariantAvailability(variantIds, open);
+
+  const hasUnavailable =
+    loaded &&
+    items.some((item) => !availability.get(item.variantId)?.available);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -49,8 +53,9 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
         ) : (
           <div className="mt-6 flex flex-col gap-4">
             {items.map((item, index) => {
-              const stock = liveStock.get(item.variantId);
-              const outOfStock = stock !== undefined && stock <= 0;
+              const entry = availability.get(item.variantId);
+              const unavailable =
+                loaded && entry !== undefined && !entry.available;
               const lineKey =
                 item.variantId ||
                 `${item.productId}-${item.color ?? ""}-${item.size ?? ""}-${index}`;
@@ -58,7 +63,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                 <CartLineItem
                   key={lineKey}
                   item={item}
-                  outOfStock={outOfStock}
+                  unavailable={unavailable}
                   onUpdateQty={updateQty}
                   onRemove={removeItem}
                 />
@@ -83,11 +88,16 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                 </span>
               </div>
             </div>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" disabled={hasUnavailable}>
               <Link href="/checkout" onClick={() => setOpen(false)}>
                 Checkout
               </Link>
             </Button>
+            {hasUnavailable && (
+              <p className="text-center text-xs text-coral-pulse">
+                Remove unavailable items to continue
+              </p>
+            )}
           </div>
         )}
       </SheetContent>
@@ -97,7 +107,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
 
 function CartLineItem({
   item,
-  outOfStock,
+  unavailable,
   onUpdateQty,
   onRemove,
 }: {
@@ -111,7 +121,7 @@ function CartLineItem({
     qty: number;
     image: string | null;
   };
-  outOfStock: boolean;
+  unavailable: boolean;
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
 }) {
@@ -147,9 +157,9 @@ function CartLineItem({
         {variantLabel && (
           <p className="text-xs text-muted-foreground">{variantLabel}</p>
         )}
-        {outOfStock && (
+        {unavailable && (
           <p className="text-xs font-medium text-coral-pulse">
-            This item is no longer in stock — remove to continue checkout
+            This item is no longer available — remove to continue checkout
           </p>
         )}
         <p className="tabular-price text-sm font-medium">
@@ -166,7 +176,7 @@ function CartLineItem({
           <span className="tabular-price w-6 text-center text-sm">{optimisticQty}</span>
           <button
             onClick={() => handleQtyChange(1)}
-            disabled={outOfStock}
+            disabled={unavailable}
             className="inline-flex h-7 w-7 items-center justify-center rounded border border-border hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream disabled:opacity-40"
             aria-label="Increase quantity"
           >
@@ -184,4 +194,4 @@ function CartLineItem({
     </div>
   );
 }
-
+
