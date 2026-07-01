@@ -3,9 +3,11 @@ import { createCJOrder, type CJOrderResult } from "@/lib/cj";
 import type { CartItemInput, ShippingAddress } from "@/lib/validations";
 
 export type ResolvedCartItem = {
+  variantId: string;
   productId: string;
   qty: number;
   price: number;
+  shippingCost: number;
   sku: string;
   title: string;
   stock: number;
@@ -27,38 +29,49 @@ export async function resolveCartItems(
   items: CartItemInput[]
 ): Promise<{ items: ResolvedCartItem[]; total: number } | { error: string }> {
   const supabase = createServiceClient();
-  const productIds = items.map((i) => i.productId);
+  const variantIds = items.map((i) => i.variantId);
 
-  const { data: products, error } = await supabase
-    .from("products")
-    .select("id, price_usd, stock, sku, title, is_active")
-    .in("id", productIds);
+  const { data: variants, error } = await supabase
+    .from("product_variants")
+    .select(
+      "id, product_id, price_usd, shipping_cost_usd, stock, sku, is_active, product:products(id, title, is_active)"
+    )
+    .in("id", variantIds);
 
-  if (error || !products) {
-    return { error: "Failed to fetch products" };
+  if (error || !variants) {
+    return { error: "Failed to fetch product variants" };
   }
 
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  const variantMap = new Map(variants.map((v) => [v.id, v]));
   const resolved: ResolvedCartItem[] = [];
   let total = 0;
 
   for (const item of items) {
-    const product = productMap.get(item.productId);
-    if (!product || !product.is_active) {
-      return { error: `Product ${item.productId} is unavailable` };
+    const variant = variantMap.get(item.variantId);
+    const product = Array.isArray(variant?.product)
+      ? variant.product[0]
+      : variant?.product;
+
+    if (!variant || !variant.is_active || !product?.is_active) {
+      return { error: `Variant ${item.variantId} is unavailable` };
     }
-    if (product.stock < item.qty) {
+    if (variant.stock < item.qty) {
       return { error: `"${product.title}" is out of stock` };
     }
-    const price = Number(product.price_usd);
-    total += price * item.qty;
+
+    const price = Number(variant.price_usd);
+    const shippingCost = Number(variant.shipping_cost_usd);
+    total += (price + shippingCost) * item.qty;
+
     resolved.push({
-      productId: product.id,
+      variantId: variant.id,
+      productId: variant.product_id,
       qty: item.qty,
       price,
-      sku: product.sku,
+      shippingCost,
+      sku: variant.sku,
       title: product.title,
-      stock: product.stock,
+      stock: variant.stock,
     });
   }
 
@@ -189,7 +202,7 @@ export async function fulfillOrder(params: {
   const supabase = createServiceClient();
 
   const rpcItems = items.map((item) => ({
-    product_id: item.productId,
+    variant_id: item.variantId,
     qty: item.qty,
     price: item.price,
   }));
@@ -221,7 +234,7 @@ export async function fulfillOrder(params: {
     shipping: params.shipping,
     email: authUser?.user?.email,
     items: items.map((i) => ({
-      productId: i.productId,
+      variantId: i.variantId,
       sku: i.sku,
       qty: i.qty,
     })),

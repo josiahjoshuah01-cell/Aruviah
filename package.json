@@ -9,6 +9,8 @@
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
     "import:cj": "tsx scripts/import-cj-catalog.ts",
+    "import:cj-variants": "tsx scripts/import-cj-variant-catalog.ts",
+    "import:cj-variants:fill": "tsx scripts/import-cj-variant-catalog.ts --only=beauty,sports",
     "import:cj-categories": "tsx scripts/import-cj-categories.ts"
   },
   "dependencies": {

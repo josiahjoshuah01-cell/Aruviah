@@ -16,9 +16,13 @@ export function AddToCartButton({ product }: { product: Product }) {
       return;
     }
     addItem({
+      variantId: product.default_variant_id,
       productId: product.id,
       title: product.title,
+      color: null,
+      size: null,
       price: product.price_usd,
+      shippingCost: product.shipping_cost_usd,
       image: product.image_url,
     });
     setPulsing(true);

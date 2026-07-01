@@ -26,7 +26,7 @@ const CJ_API_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
 const CJ_SERVER_CACHE_MS = 24 * 60 * 60 * 1000;
 
 export type CJOrderItem = {
-  productId: string;
+  variantId: string;
   sku: string;
   qty: number;
 };
@@ -228,30 +228,40 @@ export async function getCJAccessToken(): Promise<string | null> {
   return resolveCJAccessToken();
 }
 
-type ProductCJMapping = {
+type VariantCJMapping = {
   id: string;
   sku: string;
-  cj_product_id: string | null;
   cj_variant_id: string | null;
+  product: { cj_product_id: string | null } | null;
 };
 
 async function loadCJMappings(
   items: CJOrderItem[]
-): Promise<Map<string, ProductCJMapping>> {
+): Promise<Map<string, VariantCJMapping>> {
   const supabase = createServiceClient();
-  const productIds = items.map((i) => i.productId);
+  const variantIds = items.map((i) => i.variantId);
 
   const { data, error } = await supabase
-    .from("products")
-    .select("id, sku, cj_product_id, cj_variant_id")
-    .in("id", productIds);
+    .from("product_variants")
+    .select("id, sku, cj_variant_id, product:products(cj_product_id)")
+    .in("id", variantIds);
 
   if (error || !data) {
-    console.error("[CJ] Failed to load product CJ mappings:", error);
+    console.error("[CJ] Failed to load variant CJ mappings:", error);
     return new Map();
   }
 
-  return new Map(data.map((p) => [p.id, p]));
+  return new Map(
+    data.map((v) => [
+      v.id,
+      {
+        id: v.id,
+        sku: v.sku,
+        cj_variant_id: v.cj_variant_id,
+        product: Array.isArray(v.product) ? v.product[0] : v.product,
+      },
+    ])
+  );
 }
 
 async function loadOrderLineItemIds(
@@ -260,7 +270,7 @@ async function loadOrderLineItemIds(
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("order_items")
-    .select("id, product_id")
+    .select("id, variant_id")
     .eq("order_id", orderId);
 
   if (error || !data) {
@@ -268,12 +278,12 @@ async function loadOrderLineItemIds(
     return new Map();
   }
 
-  return new Map(data.map((row) => [row.product_id, row.id]));
+  return new Map(data.map((row) => [row.variant_id, row.id]));
 }
 
 function buildCreateOrderPayload(
   order: CJOrderInput,
-  mappings: Map<string, ProductCJMapping>,
+  mappings: Map<string, VariantCJMapping>,
   lineItemIds: Map<string, string>
 ) {
   const { shipping } = order;
@@ -302,9 +312,9 @@ function buildCreateOrderPayload(
     platform: "shopify",
     orderFlow: 1,
     products: order.items.map((item) => {
-      const mapped = mappings.get(item.productId)!;
+      const mapped = mappings.get(item.variantId)!;
       const storeLineItemId =
-        lineItemIds.get(item.productId) ?? `${order.orderId}-${item.productId}`;
+        lineItemIds.get(item.variantId) ?? `${order.orderId}-${item.variantId}`;
       return {
         vid: mapped.cj_variant_id,
         quantity: item.qty,
@@ -327,7 +337,7 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
   const unmappedSkus: string[] = [];
 
   for (const item of order.items) {
-    const mapped = mappings.get(item.productId);
+    const mapped = mappings.get(item.variantId);
     if (!mapped?.cj_variant_id) {
       unmappedSkus.push(item.sku);
     }

@@ -12,15 +12,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useCartStore } from "@/lib/cart-store";
+import {
+  useCartStore,
+  selectCartSubtotal,
+  selectCartShipping,
+  selectCartTotalPrice,
+} from "@/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
+import { formatVariantLabel } from "@/lib/variant-utils";
 import { shippingSchema, type ShippingAddress } from "@/lib/validations";
 import { createClient } from "@/lib/supabase/client";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
-  const totalPrice = useCartStore((s) => s.totalPrice());
+  const subtotal = useCartStore(selectCartSubtotal);
+  const shipping = useCartStore(selectCartShipping);
+  const totalPrice = useCartStore(selectCartTotalPrice);
   const clearCart = useCartStore((s) => s.clearCart);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
 
@@ -63,7 +71,7 @@ export default function CheckoutPage() {
   }
 
   const cartPayload = items.map((i) => ({
-    productId: i.productId,
+    variantId: i.variantId,
     qty: i.qty,
   }));
 
@@ -131,7 +139,7 @@ export default function CheckoutPage() {
           <h2 className="mb-4 font-display text-lg font-semibold">Order summary</h2>
           <div className="space-y-3">
             {items.map((item) => (
-              <div key={item.productId} className="flex gap-3">
+              <div key={item.variantId} className="flex gap-3">
                 <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-muted">
                   {item.image && (
                     <Image src={item.image} alt={item.title} fill className="object-cover" />
@@ -139,18 +147,35 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex-1">
                   <p className="line-clamp-1 text-sm">{item.title}</p>
+                  {formatVariantLabel(item.color, item.size) && (
+                    <p className="text-xs text-muted-foreground">
+                      {formatVariantLabel(item.color, item.size)}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">Qty: {item.qty}</p>
                 </div>
                 <p className="tabular-price text-sm">
-                  {formatPrice(item.price * item.qty)}
+                  {formatPrice((item.price + item.shippingCost) * item.qty)}
                 </p>
               </div>
             ))}
           </div>
           <Separator className="my-4" />
-          <div className="mb-6 flex justify-between font-medium">
-            <span>Total</span>
-            <span className="tabular-price text-lg">{formatPrice(totalPrice)}</span>
+          <div className="mb-6 space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="tabular-price">{formatPrice(subtotal)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Shipping</span>
+              <span className="tabular-price">
+                {shipping > 0 ? formatPrice(shipping) : "—"}
+              </span>
+            </div>
+            <div className="flex justify-between pt-1 font-medium">
+              <span>Total</span>
+              <span className="tabular-price text-lg">{formatPrice(totalPrice)}</span>
+            </div>
           </div>
 
           <PayPalScriptProvider

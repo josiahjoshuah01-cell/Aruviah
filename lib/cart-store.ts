@@ -5,12 +5,22 @@ import type { CartItem } from "@/lib/types";
 type CartState = {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "qty">, qty?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQty: (productId: string, qty: number) => void;
+  removeItem: (variantId: string) => void;
+  updateQty: (variantId: string, qty: number) => void;
   clearCart: () => void;
-  totalItems: () => number;
-  totalPrice: () => number;
 };
+
+export const selectCartTotalItems = (s: CartState) =>
+  s.items.reduce((sum, i) => sum + i.qty, 0);
+
+export const selectCartSubtotal = (s: CartState) =>
+  s.items.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+export const selectCartShipping = (s: CartState) =>
+  s.items.reduce((sum, i) => sum + i.shippingCost * i.qty, 0);
+
+export const selectCartTotalPrice = (s: CartState) =>
+  selectCartSubtotal(s) + selectCartShipping(s);
 
 export const useCartStore = create<CartState>()(
   persist(
@@ -19,12 +29,12 @@ export const useCartStore = create<CartState>()(
       addItem: (item, qty = 1) => {
         set((state) => {
           const existing = state.items.find(
-            (i) => i.productId === item.productId
+            (i) => i.variantId === item.variantId
           );
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === item.productId
+                i.variantId === item.variantId
                   ? { ...i, qty: i.qty + qty }
                   : i
               ),
@@ -33,26 +43,23 @@ export const useCartStore = create<CartState>()(
           return { items: [...state.items, { ...item, qty }] };
         });
       },
-      removeItem: (productId) => {
+      removeItem: (variantId) => {
         set((state) => ({
-          items: state.items.filter((i) => i.productId !== productId),
+          items: state.items.filter((i) => i.variantId !== variantId),
         }));
       },
-      updateQty: (productId, qty) => {
+      updateQty: (variantId, qty) => {
         if (qty <= 0) {
-          get().removeItem(productId);
+          get().removeItem(variantId);
           return;
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.productId === productId ? { ...i, qty } : i
+            i.variantId === variantId ? { ...i, qty } : i
           ),
         }));
       },
       clearCart: () => set({ items: [] }),
-      totalItems: () => get().items.reduce((sum, i) => sum + i.qty, 0),
-      totalPrice: () =>
-        get().items.reduce((sum, i) => sum + i.price * i.qty, 0),
     }),
     { name: "aruviah-cart" }
   )

@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { ProductGrid } from "@/components/store/product-grid";
+import { ProductCatalog } from "@/components/store/product-catalog";
 import { ProductGridSkeleton } from "@/components/ui/skeleton";
-import { getCategoryBySlug, getCategories, getProducts } from "@/lib/queries";
+import { getCategoryBySlug, getCategories } from "@/lib/queries";
 import type { Metadata } from "next";
 
 export const revalidate = 60;
@@ -33,21 +33,26 @@ export async function generateMetadata({
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
+  const resolvedParams = await searchParams;
   const category = await getCategoryBySlug(slug);
 
   if (!category) notFound();
-
-  const products = await getProducts({ categorySlug: slug });
 
   return (
     <div>
       <h1 className="mb-6 font-display text-2xl font-bold">{category.name}</h1>
       <Suspense fallback={<ProductGridSkeleton />}>
-        <ProductGrid products={products} />
+        <ProductCatalog
+          searchParams={resolvedParams}
+          categorySlug={slug}
+          basePath={`/category/${slug}`}
+        />
       </Suspense>
     </div>
   );

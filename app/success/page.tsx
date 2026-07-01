@@ -47,7 +47,7 @@ export default async function SuccessPage({
           {items.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
               <span>
-                {item.product?.title ?? "Product"} × {item.qty}
+                {item.variant?.product?.title ?? "Product"} × {item.qty}
               </span>
               <span className="tabular-price">
                 {formatPrice(item.price * item.qty)}

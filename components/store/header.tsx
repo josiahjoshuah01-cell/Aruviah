@@ -5,11 +5,11 @@ import { ShoppingBag } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/store/search-bar";
 import { CartDrawer } from "@/components/store/cart-drawer";
-import { useCartStore } from "@/lib/cart-store";
+import { useCartStore, selectCartTotalItems } from "@/lib/cart-store";
 import { Suspense, useEffect, useState } from "react";
 
 export function Header() {
-  const totalItems = useCartStore((s) => s.totalItems());
+  const totalItems = useCartStore(selectCartTotalItems);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);

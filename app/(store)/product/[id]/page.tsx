@@ -1,9 +1,11 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import { AddToCartButton } from "@/components/store/add-to-cart-button";
-import { getProductById } from "@/lib/queries";
-import { formatPrice, formatSoldCount } from "@/lib/utils";
+import { VariantSelector } from "@/components/store/variant-selector";
+import { ProductReviews } from "@/components/store/product-reviews";
+import {
+  getProductWithVariants,
+} from "@/lib/queries";
 import type { Metadata } from "next";
+import type { SerializableVariant } from "@/lib/variant-utils";
 
 export const revalidate = 60;
 
@@ -13,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const product = await getProductById(id);
+  const product = await getProductWithVariants(id);
   if (!product) return { title: "Product not found" };
   return {
     title: product.title,
@@ -31,54 +33,42 @@ export default async function ProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await getProductById(id);
+  const product = await getProductWithVariants(id);
 
   if (!product) notFound();
 
-  const lowStock = product.stock > 0 && product.stock < 10;
+  const variants: SerializableVariant[] = product.variants.map((v) => ({
+    id: v.id,
+    color: v.color,
+    size: v.size,
+    price_usd: v.price_usd,
+    shipping_cost_usd: v.shipping_cost_usd,
+    stock: v.stock,
+    image_url: v.image_url,
+  }));
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-        {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
-            priority
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            No image available
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col gap-4">
-        <h1 className="font-display text-2xl font-bold md:text-3xl">
-          {product.title}
-        </h1>
-        <p className="tabular-price text-2xl font-semibold">
-          {formatPrice(product.price_usd)}
-        </p>
-        {product.sold_count > 0 && (
-          <p className="text-sm text-muted-foreground">
-            · {formatSoldCount(product.sold_count)}
-          </p>
-        )}
-        {lowStock && (
-          <span className="inline-flex w-fit rounded bg-coral-pulse px-2 py-1 text-xs font-semibold uppercase text-white">
-            Only {product.stock} left
-          </span>
-        )}
-        {product.description && (
+    <div>
+      <VariantSelector
+        productId={product.id}
+        productTitle={product.title}
+        coverImage={product.image_url}
+        soldCount={product.sold_count}
+        variants={variants}
+      />
+
+      {product.description && (
+        <div className="mt-8 border-t border-border pt-8">
+          <h2 className="mb-3 font-display text-lg font-semibold">
+            Description
+          </h2>
           <p className="text-muted-foreground leading-relaxed">
             {product.description}
           </p>
-        )}
-        <AddToCartButton product={product} />
-      </div>
+        </div>
+      )}
+
+      <ProductReviews productId={product.id} />
     </div>
   );
 }
