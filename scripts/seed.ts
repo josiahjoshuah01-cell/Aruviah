@@ -28,8 +28,8 @@ const supabase = createClient(
 );
 
 const CATEGORIES = [
-  { name: "Electronics", slug: "electronics", sort_order: 1 },
-  { name: "Home", slug: "home", sort_order: 2 },
+  { name: "Home", slug: "home", sort_order: 1 },
+  { name: "Electronics", slug: "electronics", sort_order: 2 },
   { name: "Beauty", slug: "beauty", sort_order: 3 },
   { name: "Fashion", slug: "fashion", sort_order: 4 },
   { name: "Toys", slug: "toys", sort_order: 5 },

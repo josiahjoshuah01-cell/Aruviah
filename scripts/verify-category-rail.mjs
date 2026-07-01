@@ -19,8 +19,8 @@ console.log("CATEGORY_RAIL_PILLS_JSON:", JSON.stringify(pills, null, 2));
 console.log("PILL_COUNT:", pills.length);
 const expected = [
   { href: "/", label: "All" },
-  { href: "/category/electronics", label: "Electronics" },
   { href: "/category/home", label: "Home" },
+  { href: "/category/electronics", label: "Electronics" },
   { href: "/category/fashion", label: "Fashion" },
   { href: "/category/kitchen", label: "Kitchen" },
 ];
