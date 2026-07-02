@@ -22,8 +22,20 @@ import { createServiceClient } from "@/lib/supabase/admin";
 
 const CJ_API_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
 
-/** CJ server-side token cache window — do not re-auth more than once per day. */
-const CJ_SERVER_CACHE_MS = 24 * 60 * 60 * 1000;
+/** When CJ_SANDBOX_MODE=true|1, createOrderV2 sends isSandbox: 1 (default off). */
+export function isCjSandboxMode(): boolean {
+  const raw = process.env.CJ_SANDBOX_MODE?.trim().toLowerCase();
+  return raw === "true" || raw === "1";
+}
+
+/**
+ * Refresh the access token proactively when CJ's returned expiry is within this
+ * window. Uses accessTokenExpiryDate from CJ — not a fixed day count.
+ */
+export const CJ_ACCESS_TOKEN_REFRESH_BEFORE_MS = 48 * 60 * 60 * 1000;
+
+/** CJ documents a 1 req/s cap on POST /authentication/getAccessToken. */
+const GET_ACCESS_TOKEN_MIN_INTERVAL_MS = 1100;
 
 export type CJOrderItem = {
   variantId: string;
@@ -46,6 +58,10 @@ export type CJOrderInput = {
   items: CJOrderItem[];
   /** Customer email for createOrderV2 — falls back to CJ_EMAIL env if omitted. */
   email?: string;
+  /** Overrides CJ_LOGISTIC_NAME env when set (e.g. from freightCalculate). */
+  logisticName?: string;
+  /** Overrides CJ_FROM_COUNTRY_CODE env for createOrderV2 fromCountryCode. */
+  fromCountryCode?: string;
 };
 
 export type CJOrderResult =
@@ -92,7 +108,51 @@ type CJCreateOrderData = {
   actualPayment?: string | number;
 };
 
+export type CjOrderDetailData = {
+  orderId?: string;
+  orderNum?: string;
+  cjOrderId?: string | null;
+  cjOrderCode?: string | null;
+  orderStatus?: string;
+  trackNumber?: string | null;
+  trackingProvider?: string | null;
+  trackingUrl?: string | null;
+};
+
+export type CjLogisticsOption = {
+  id: number;
+  orderCode: string;
+  logisticsName: string;
+  postage?: number;
+  startCountry?: string;
+  arrivalTime?: string;
+};
+
+export type CjFreightOption = {
+  logisticName: string;
+  logisticPrice: number;
+  logisticPriceCn: number | null;
+  logisticAging: string | null;
+  taxesFee: number | null;
+  clearanceOperationFee: number | null;
+  totalPostageFee: number | null;
+};
+
+export type CjTrackInfoData = {
+  trackingNumber?: string;
+  logisticName?: string;
+  trackingFrom?: string;
+  trackingTo?: string;
+  deliveryDay?: string;
+  deliveryTime?: string;
+  trackingStatus?: string;
+  lastMileCarrier?: string;
+  lastTrackNumber?: string;
+};
+
 let tokenCache: CJTokenCache | null = null;
+let resolveInFlight: Promise<string | null> | null = null;
+let lastGetAccessTokenAt = 0;
 
 const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   "united states": "US",
@@ -109,21 +169,55 @@ function hasApiKey(): boolean {
   return !!process.env.CJ_API_KEY?.trim();
 }
 
-function parseExpiryMs(isoDate: string): number {
+export function parseCjTokenExpiryMs(isoDate: string): number {
   const ms = Date.parse(isoDate);
   return Number.isNaN(ms) ? 0 : ms;
 }
 
-function isAccessTokenValid(cache: CJTokenCache): boolean {
-  return parseExpiryMs(cache.accessTokenExpiryDate) > Date.now();
+function isAccessTokenValid(
+  cache: CJTokenCache,
+  nowMs = Date.now()
+): boolean {
+  return parseCjTokenExpiryMs(cache.accessTokenExpiryDate) > nowMs;
 }
 
-function isRefreshTokenValid(cache: CJTokenCache): boolean {
-  return parseExpiryMs(cache.refreshTokenExpiryDate) > Date.now();
+function isRefreshTokenValid(
+  cache: CJTokenCache,
+  nowMs = Date.now()
+): boolean {
+  return parseCjTokenExpiryMs(cache.refreshTokenExpiryDate) > nowMs;
 }
 
-function isWithinCJServerCacheWindow(cache: CJTokenCache): boolean {
-  return Date.now() - cache.fetchedAt < CJ_SERVER_CACHE_MS;
+function msUntilAccessTokenExpiry(
+  cache: CJTokenCache,
+  nowMs = Date.now()
+): number {
+  return parseCjTokenExpiryMs(cache.accessTokenExpiryDate) - nowMs;
+}
+
+/** True when the cached access token is still usable without refreshing. */
+export function shouldUseCachedAccessToken(
+  cache: CJTokenCache,
+  nowMs = Date.now(),
+  refreshBeforeMs = CJ_ACCESS_TOKEN_REFRESH_BEFORE_MS
+): boolean {
+  const remaining = msUntilAccessTokenExpiry(cache, nowMs);
+  return remaining > refreshBeforeMs;
+}
+
+/** True when we should call refreshAccessToken before the access token lapses. */
+export function shouldRefreshAccessToken(
+  cache: CJTokenCache,
+  nowMs = Date.now(),
+  refreshBeforeMs = CJ_ACCESS_TOKEN_REFRESH_BEFORE_MS
+): boolean {
+  if (!isRefreshTokenValid(cache, nowMs)) return false;
+  const remaining = msUntilAccessTokenExpiry(cache, nowMs);
+  return remaining <= refreshBeforeMs;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function toCountryCode(country: string): string {
@@ -156,6 +250,13 @@ export async function getCJToken(): Promise<string | null> {
     );
     return null;
   }
+
+  const now = Date.now();
+  const waitMs = GET_ACCESS_TOKEN_MIN_INTERVAL_MS - (now - lastGetAccessTokenAt);
+  if (waitMs > 0) {
+    await sleep(waitMs);
+  }
+  lastGetAccessTokenAt = Date.now();
 
   try {
     const res = await fetch(`${CJ_API_BASE}/authentication/getAccessToken`, {
@@ -214,36 +315,83 @@ export async function refreshCJToken(): Promise<string | null> {
   }
 }
 
-async function resolveCJAccessToken(): Promise<string | null> {
+async function resolveCJAccessTokenImpl(): Promise<string | null> {
   if (!hasApiKey()) {
     return null;
   }
 
   if (tokenCache) {
-    if (isWithinCJServerCacheWindow(tokenCache) && isAccessTokenValid(tokenCache)) {
+    if (shouldUseCachedAccessToken(tokenCache)) {
       return tokenCache.accessToken;
     }
 
-    if (isRefreshTokenValid(tokenCache)) {
-      const refreshed = await refreshCJToken();
-      if (refreshed) return refreshed;
+    if (shouldRefreshAccessToken(tokenCache) || !isAccessTokenValid(tokenCache)) {
+      if (isRefreshTokenValid(tokenCache)) {
+        const refreshed = await refreshCJToken();
+        if (refreshed) return refreshed;
+        if (isAccessTokenValid(tokenCache)) {
+          console.warn(
+            "[CJ] refreshAccessToken failed — reusing access token until expiry"
+          );
+          return tokenCache.accessToken;
+        }
+      }
     }
   }
 
   return getCJToken();
 }
 
-/** Shared CJ API auth — respects 24h cache + refresh token flow. */
+async function resolveCJAccessToken(): Promise<string | null> {
+  if (resolveInFlight) return resolveInFlight;
+  resolveInFlight = resolveCJAccessTokenImpl().finally(() => {
+    resolveInFlight = null;
+  });
+  return resolveInFlight;
+}
+
+/** Shared CJ API auth — expiry-driven cache + refresh token flow. */
 export async function getCJAccessToken(): Promise<string | null> {
   return resolveCJAccessToken();
 }
+
+/** Test helpers — not for production use. */
+export const __cjAuthTest = {
+  getCache: () => tokenCache,
+  setCache: (cache: CJTokenCache | null) => {
+    tokenCache = cache;
+  },
+  reset: () => {
+    tokenCache = null;
+    resolveInFlight = null;
+    lastGetAccessTokenAt = 0;
+  },
+  resolveCJAccessToken,
+};
 
 type VariantCJMapping = {
   id: string;
   sku: string;
   cj_variant_id: string | null;
+  ships_from_country: string | null;
   product: { cj_product_id: string | null } | null;
 };
+
+export type CjFreightProduct = {
+  vid: string;
+  quantity: number;
+};
+
+/** CJ createOrderV2 fromCountryCode from stored variant warehouse origin. */
+function warehouseFromCountryCode(shipsFrom: string | null | undefined): string {
+  const code = shipsFrom?.trim().toUpperCase();
+  if (!code) {
+    return process.env.CJ_FROM_COUNTRY_CODE?.trim() || "CN";
+  }
+  if (code === "UK") return "GB";
+  if (/^[A-Z]{2}$/.test(code)) return code;
+  return process.env.CJ_FROM_COUNTRY_CODE?.trim() || "CN";
+}
 
 async function loadCJMappings(
   items: CJOrderItem[]
@@ -253,7 +401,9 @@ async function loadCJMappings(
 
   const { data, error } = await supabase
     .from("product_variants")
-    .select("id, sku, cj_variant_id, product:products(cj_product_id)")
+    .select(
+      "id, sku, cj_variant_id, ships_from_country, product:products(cj_product_id)"
+    )
     .in("id", variantIds);
 
   if (error || !data) {
@@ -268,6 +418,7 @@ async function loadCJMappings(
         id: v.id,
         sku: v.sku,
         cj_variant_id: v.cj_variant_id,
+        ships_from_country: v.ships_from_country ?? null,
         product: Array.isArray(v.product) ? v.product[0] : v.product,
       },
     ])
@@ -277,6 +428,14 @@ async function loadCJMappings(
 async function loadOrderLineItemIds(
   orderId: string
 ): Promise<Map<string, string>> {
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      orderId
+    )
+  ) {
+    return new Map();
+  }
+
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("order_items")
@@ -299,7 +458,9 @@ function buildCreateOrderPayload(
   const { shipping } = order;
   const countryCode = toCountryCode(shipping.country);
   const logisticName =
-    process.env.CJ_LOGISTIC_NAME?.trim() || "PostNL";
+    order.logisticName?.trim() ||
+    process.env.CJ_LOGISTIC_NAME?.trim() ||
+    "PostNL";
   const email =
     order.email?.trim() || process.env.CJ_EMAIL?.trim() || "";
 
@@ -318,9 +479,13 @@ function buildCreateOrderPayload(
     remark: "",
     email,
     logisticName,
-    fromCountryCode: process.env.CJ_FROM_COUNTRY_CODE?.trim() || "CN",
+    fromCountryCode:
+      order.fromCountryCode?.trim() ||
+      process.env.CJ_FROM_COUNTRY_CODE?.trim() ||
+      "CN",
     platform: "shopify",
     orderFlow: 1,
+    ...(isCjSandboxMode() ? { isSandbox: 1 } : {}),
     products: order.items.map((item) => {
       const mapped = mappings.get(item.variantId)!;
       const storeLineItemId =
@@ -331,6 +496,68 @@ function buildCreateOrderPayload(
         storeLineItemId,
       };
     }),
+  };
+}
+
+/**
+ * Resolve warehouse-matched fromCountryCode + logisticName via freightCalculate.
+ * Skipped when caller already supplied both (sandbox script / tests).
+ */
+async function resolveOrderLogistics(
+  order: CJOrderInput,
+  mappings: Map<string, VariantCJMapping>
+): Promise<
+  | { fromCountryCode: string; logisticName: string }
+  | { error: string }
+> {
+  if (order.logisticName?.trim() && order.fromCountryCode?.trim()) {
+    return {
+      fromCountryCode: order.fromCountryCode.trim().toUpperCase(),
+      logisticName: order.logisticName.trim(),
+    };
+  }
+
+  const origins = new Set<string>();
+  const freightProducts: CjFreightProduct[] = [];
+
+  for (const item of order.items) {
+    const mapped = mappings.get(item.variantId);
+    if (!mapped?.cj_variant_id) continue;
+    origins.add(warehouseFromCountryCode(mapped.ships_from_country));
+    freightProducts.push({
+      vid: mapped.cj_variant_id,
+      quantity: item.qty,
+    });
+  }
+
+  if (freightProducts.length === 0) {
+    return { error: "No CJ variants to quote logistics for" };
+  }
+
+  if (origins.size > 1) {
+    return {
+      error: `Order mixes warehouse origins (${[...origins].join(", ")}) — cannot select a single CJ logistics route`,
+    };
+  }
+
+  const fromCountryCode = [...origins][0];
+  const endCountryCode = toCountryCode(order.shipping.country);
+
+  const options = await getValidLogisticsOptions(
+    freightProducts,
+    fromCountryCode,
+    endCountryCode
+  );
+
+  if (options.length === 0) {
+    return {
+      error: `No CJ logistics available for ${fromCountryCode}→${endCountryCode}`,
+    };
+  }
+
+  return {
+    fromCountryCode,
+    logisticName: options[0].logisticName,
   };
 }
 
@@ -373,7 +600,31 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
   }
 
   const lineItemIds = await loadOrderLineItemIds(order.orderId);
-  const payload = buildCreateOrderPayload(order, mappings, lineItemIds);
+
+  const logistics = await resolveOrderLogistics(order, mappings);
+  if ("error" in logistics) {
+    console.error(
+      `[CJ] Logistics resolution failed for order ${order.orderId}:`,
+      logistics.error
+    );
+    return { success: false, error: logistics.error };
+  }
+
+  const orderWithLogistics: CJOrderInput = {
+    ...order,
+    fromCountryCode: logistics.fromCountryCode,
+    logisticName: logistics.logisticName,
+  };
+
+  const payload = buildCreateOrderPayload(
+    orderWithLogistics,
+    mappings,
+    lineItemIds
+  );
+
+  console.log(
+    `[CJ] createOrderV2 logistics: ${logistics.fromCountryCode}→${toCountryCode(order.shipping.country)} via "${logistics.logisticName}"`
+  );
 
   try {
     const res = await fetch(`${CJ_API_BASE}/shopping/order/createOrderV2`, {
@@ -421,7 +672,7 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
       0;
 
     console.log(
-      `[CJ] Order created: aruviah=${order.orderId} cj=${cjOrderId} shipment=${shipmentOrderId ?? "—"}`
+      `[CJ] Order created: aruviah=${order.orderId} cj=${cjOrderId} shipment=${shipmentOrderId ?? "—"}${isCjSandboxMode() ? " (sandbox)" : ""}`
     );
     return {
       success: true,
@@ -435,6 +686,319 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
     return {
       success: false,
       error: err instanceof Error ? err.message : "Unknown CJ API error",
+    };
+  }
+}
+
+/** GET /shopping/order/getOrderDetail */
+export async function getCjOrderDetail(
+  cjOrderId: string
+): Promise<CjOrderDetailData | null> {
+  const token = await resolveCJAccessToken();
+  if (!token) return null;
+
+  try {
+    const url = `${CJ_API_BASE}/shopping/order/getOrderDetail?orderId=${encodeURIComponent(cjOrderId)}`;
+    const res = await fetch(url, {
+      headers: { "CJ-Access-Token": token },
+    });
+    const body = (await res.json()) as CJApiEnvelope<CjOrderDetailData>;
+    if (!res.ok || body.code !== 200 || !body.result || !body.data) {
+      console.error(
+        "[CJ] getOrderDetail failed:",
+        JSON.stringify({
+          httpStatus: res.status,
+          code: body.code,
+          message: body.message,
+          cjOrderId,
+        })
+      );
+      return null;
+    }
+    return body.data;
+  } catch (err) {
+    console.error("[CJ] getOrderDetail request error:", err);
+    return null;
+  }
+}
+
+/** POST /logistic/freightCalculate — available carriers for a variant route. */
+export async function getValidLogisticsOptions(
+  products: CjFreightProduct[],
+  startCountryCode: string,
+  endCountryCode: string
+): Promise<CjFreightOption[]> {
+  const token = await resolveCJAccessToken();
+  if (!token || products.length === 0) return [];
+
+  const normalizedProducts = products
+    .filter((p) => p.vid?.trim() && p.quantity > 0)
+    .map((p) => ({ vid: p.vid.trim(), quantity: p.quantity }));
+
+  if (normalizedProducts.length === 0) return [];
+
+  try {
+    const res = await fetch(`${CJ_API_BASE}/logistic/freightCalculate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "CJ-Access-Token": token,
+      },
+      body: JSON.stringify({
+        startCountryCode: startCountryCode.trim().toUpperCase(),
+        endCountryCode: endCountryCode.trim().toUpperCase(),
+        products: normalizedProducts,
+      }),
+    });
+
+    const body = (await res.json()) as CJApiEnvelope<
+      Array<{
+        logisticName?: string;
+        logisticPrice?: number | string;
+        logisticPriceCn?: number | string;
+        logisticAging?: string;
+        taxesFee?: number | string;
+        clearanceOperationFee?: number | string;
+        totalPostageFee?: number | string;
+      }>
+    >;
+
+    if (!res.ok || body.code !== 200 || !body.result || !Array.isArray(body.data)) {
+      console.error(
+        "[CJ] freightCalculate failed:",
+        JSON.stringify({
+          httpStatus: res.status,
+          code: body.code,
+          message: body.message,
+          products: normalizedProducts.map((p) => p.vid),
+          startCountryCode,
+          endCountryCode,
+        })
+      );
+      return [];
+    }
+
+    return body.data
+      .filter((row) => row.logisticName?.trim())
+      .map((row) => ({
+        logisticName: row.logisticName!.trim(),
+        logisticPrice: parseFloat(String(row.logisticPrice ?? 0)) || 0,
+        logisticPriceCn:
+          row.logisticPriceCn != null
+            ? parseFloat(String(row.logisticPriceCn)) || null
+            : null,
+        logisticAging: row.logisticAging?.trim() || null,
+        taxesFee:
+          row.taxesFee != null ? parseFloat(String(row.taxesFee)) || null : null,
+        clearanceOperationFee:
+          row.clearanceOperationFee != null
+            ? parseFloat(String(row.clearanceOperationFee)) || null
+            : null,
+        totalPostageFee:
+          row.totalPostageFee != null
+            ? parseFloat(String(row.totalPostageFee)) || null
+            : null,
+      }));
+  } catch (err) {
+    console.error("[CJ] freightCalculate request error:", err);
+    return [];
+  }
+}
+
+/** GET /logistic/trackInfo — live carrier status for a tracking number. */
+export async function getCjTrackInfo(
+  trackNumber: string
+): Promise<CjTrackInfoData | null> {
+  const trimmed = trackNumber.trim();
+  if (!trimmed) return null;
+
+  const token = await resolveCJAccessToken();
+  if (!token) return null;
+
+  try {
+    const url = `${CJ_API_BASE}/logistic/trackInfo?trackNumber=${encodeURIComponent(trimmed)}`;
+    const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
+    const body = (await res.json()) as CJApiEnvelope<CjTrackInfoData[]>;
+
+    if (!res.ok || body.code !== 200 || !body.result || !Array.isArray(body.data)) {
+      console.error(
+        "[CJ] trackInfo failed:",
+        JSON.stringify({
+          httpStatus: res.status,
+          code: body.code,
+          message: body.message,
+          trackNumber: trimmed,
+        })
+      );
+      return null;
+    }
+
+    const row =
+      body.data.find(
+        (r) => r.trackingNumber?.trim() === trimmed
+      ) ?? body.data[0];
+
+    return row ?? null;
+  } catch (err) {
+    console.error("[CJ] trackInfo request error:", err);
+    return null;
+  }
+}
+
+/** GET /shopping/order/getOrderLogisticsInfo */
+export async function getCjOrderLogisticsOptions(
+  orderCode: string
+): Promise<CjLogisticsOption[]> {
+  const token = await resolveCJAccessToken();
+  if (!token) return [];
+
+  try {
+    const url = `${CJ_API_BASE}/shopping/order/getOrderLogisticsInfo?orderCode=${encodeURIComponent(orderCode)}`;
+    const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
+    const body = (await res.json()) as CJApiEnvelope<CjLogisticsOption[]>;
+    if (!res.ok || body.code !== 200 || !body.result || !Array.isArray(body.data)) {
+      return [];
+    }
+    return body.data;
+  } catch {
+    return [];
+  }
+}
+
+/** POST /shopping/order/updateLogistics */
+export async function updateCjOrderLogistics(input: {
+  id: number;
+  orderCode: string;
+  logisticsName: string;
+  orderAreaId?: number;
+  areaEnName?: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const token = await resolveCJAccessToken();
+  if (!token) return { ok: false, error: "CJ authentication failed" };
+
+  try {
+    const res = await fetch(`${CJ_API_BASE}/shopping/order/updateLogistics`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "CJ-Access-Token": token,
+      },
+      body: JSON.stringify({
+        id: input.id,
+        orderCode: input.orderCode,
+        logisticsName: input.logisticsName,
+        orderAreaId: input.orderAreaId ?? 2,
+        areaEnName: input.areaEnName ?? "United States",
+        from: 1,
+      }),
+    });
+    const body = (await res.json()) as CJApiEnvelope<unknown>;
+    if (!res.ok || body.code !== 200 || !body.result) {
+      return { ok: false, error: body.message || `CJ error code ${body.code}` };
+    }
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "updateLogistics failed",
+    };
+  }
+}
+
+/** PATCH /shopping/order/confirmOrder — moves CREATED → UNPAID before payment. */
+export async function cjConfirmOrder(
+  cjOrderId: string
+): Promise<{ ok: true; orderId: string } | { ok: false; error: string }> {
+  const token = await resolveCJAccessToken();
+  if (!token) return { ok: false, error: "CJ authentication failed" };
+
+  try {
+    const res = await fetch(`${CJ_API_BASE}/shopping/order/confirmOrder`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "CJ-Access-Token": token,
+      },
+      body: JSON.stringify({ orderId: cjOrderId }),
+    });
+    const body = (await res.json()) as CJApiEnvelope<string>;
+    if (!res.ok || body.code !== 200 || !body.result) {
+      return { ok: false, error: body.message || `CJ error code ${body.code}` };
+    }
+    return { ok: true, orderId: String(body.data ?? cjOrderId) };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "confirmOrder failed",
+    };
+  }
+}
+
+/** POST /shopping/sandbox/simulatePay — sandbox orders only (isSandbox=1). */
+export async function cjSandboxSimulatePay(input: {
+  orderId?: string;
+  shipmentOrderId?: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const token = await resolveCJAccessToken();
+  if (!token) return { ok: false, error: "CJ authentication failed" };
+
+  const orderId = input.orderId?.trim();
+  const shipmentOrderId = input.shipmentOrderId?.trim();
+  if (!orderId && !shipmentOrderId) {
+    return { ok: false, error: "orderId or shipmentOrderId required" };
+  }
+
+  try {
+    const res = await fetch(`${CJ_API_BASE}/shopping/sandbox/simulatePay`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "CJ-Access-Token": token,
+      },
+      body: JSON.stringify({
+        ...(orderId ? { orderId } : {}),
+        ...(shipmentOrderId ? { shipmentOrderId } : {}),
+      }),
+    });
+    const body = (await res.json()) as CJApiEnvelope<boolean>;
+    if (!res.ok || body.code !== 200 || !body.result) {
+      return { ok: false, error: body.message || `CJ error code ${body.code}` };
+    }
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "simulatePay failed",
+    };
+  }
+}
+
+/** POST /shopping/sandbox/updateStatus — sandbox orders only. */
+export async function cjSandboxUpdateStatus(
+  cjOrderId: string,
+  targetStatus: 400 | 500 | 600 | 700
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const token = await resolveCJAccessToken();
+  if (!token) return { ok: false, error: "CJ authentication failed" };
+
+  try {
+    const res = await fetch(`${CJ_API_BASE}/shopping/sandbox/updateStatus`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "CJ-Access-Token": token,
+      },
+      body: JSON.stringify({ orderId: cjOrderId, targetStatus }),
+    });
+    const body = (await res.json()) as CJApiEnvelope<boolean>;
+    if (!res.ok || body.code !== 200 || !body.result) {
+      return { ok: false, error: body.message || `CJ error code ${body.code}` };
+    }
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "updateStatus failed",
     };
   }
 }

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { fetchCjProductReviewSummary } from "@/lib/cj-product-comments";
 import {
   buildFetchedCjProduct,
   buildStagedRow,
@@ -221,7 +222,8 @@ export async function stageCjLookup(
     fetched.product.coverImage,
     category.id,
     `id:${trimmedId}`,
-    fetched.product.listShippingCountryCodes
+    fetched.product.listShippingCountryCodes,
+    await fetchCjProductReviewSummary(headers, fetched.product.detail.pid)
   );
 
   await persistStagedProduct(supabase, row);

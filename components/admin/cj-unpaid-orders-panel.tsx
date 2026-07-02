@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CjPaymentNotice } from "@/components/admin/cj-payment-notice";
+import { CjTrackingNotice } from "@/components/admin/cj-tracking-notice";
 import type { AdminOrderRow } from "@/lib/admin-queries";
 import { formatPrice } from "@/lib/utils";
 
@@ -33,13 +34,24 @@ export function CjUnpaidOrdersPanel({ orders }: { orders: AdminOrderRow[] }) {
                 {order.cj_order_id ?? "—"}
               </p>
             </div>
-            <CjPaymentNotice
-              compact
-              cjOrderId={order.cj_order_id}
-              shipmentOrderId={order.cj_shipment_order_id}
-              paymentStatus={order.cj_payment_status}
-              amountUsd={order.cj_order_amount_usd}
-            />
+            <div className="flex flex-col items-end gap-2">
+              <CjPaymentNotice
+                compact
+                cjOrderId={order.cj_order_id}
+                shipmentOrderId={order.cj_shipment_order_id}
+                paymentStatus={order.cj_payment_status}
+                amountUsd={order.cj_order_amount_usd}
+              />
+              <CjTrackingNotice
+                compact
+                trackNumber={order.cj_track_number}
+                trackingProvider={order.cj_tracking_provider}
+                trackingUrl={order.cj_tracking_url}
+                trackingStatus={order.cj_tracking_status}
+                lastMileCarrier={order.cj_last_mile_carrier}
+                lastMileTrackNumber={order.cj_last_mile_track_number}
+              />
+            </div>
           </li>
         ))}
       </ul>

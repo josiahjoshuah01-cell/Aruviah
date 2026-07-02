@@ -18,6 +18,12 @@ export type AdminOrderRow = {
   cj_order_amount_usd: number | null;
   fulfillment_note: string | null;
   tracking_number: string | null;
+  cj_track_number: string | null;
+  cj_tracking_provider: string | null;
+  cj_tracking_url: string | null;
+  cj_tracking_status: string | null;
+  cj_last_mile_carrier: string | null;
+  cj_last_mile_track_number: string | null;
   shipping: ShippingInfo;
   created_at: string;
 };
@@ -85,6 +91,12 @@ function mapOrderRow(
     cj_order_amount_usd: number | null;
     fulfillment_note: string | null;
     tracking_number: string | null;
+    cj_track_number: string | null;
+    cj_tracking_provider: string | null;
+    cj_tracking_url: string | null;
+    cj_tracking_status: string | null;
+    cj_last_mile_carrier: string | null;
+    cj_last_mile_track_number: string | null;
     shipping: unknown;
     created_at: string;
   },
@@ -107,6 +119,12 @@ function mapOrderRow(
         : null,
     fulfillment_note: row.fulfillment_note,
     tracking_number: row.tracking_number,
+    cj_track_number: row.cj_track_number,
+    cj_tracking_provider: row.cj_tracking_provider,
+    cj_tracking_url: row.cj_tracking_url,
+    cj_tracking_status: row.cj_tracking_status,
+    cj_last_mile_carrier: row.cj_last_mile_carrier,
+    cj_last_mile_track_number: row.cj_last_mile_track_number,
     shipping: row.shipping as ShippingInfo,
     created_at: row.created_at,
   };
@@ -145,7 +163,7 @@ export async function listAdminOrders(options: {
   let query = supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
     );
 
   if (options.status && options.status !== "all") {
@@ -184,7 +202,7 @@ export async function getAdminOrderDetail(
   const { data: order, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
     )
     .eq("id", orderId)
     .maybeSingle();
@@ -230,7 +248,7 @@ export async function listFulfillmentQueue(): Promise<AdminOrderDetail[]> {
   const { data: orders, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
     )
     .in("status", FULFILLMENT_QUEUE_STATUSES)
     .order("created_at", { ascending: true });
@@ -302,7 +320,7 @@ export async function listOrdersNeedingCjPayment(): Promise<AdminOrderRow[]> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
     )
     .eq("cj_payment_status", "unpaid")
     .order("created_at", { ascending: true });

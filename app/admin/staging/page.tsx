@@ -43,6 +43,13 @@ export default async function AdminStagingPage() {
     created_at: row.created_at,
     ships_from_country: row.ships_from_country ?? null,
     is_fast_shipping: row.is_fast_shipping ?? false,
+    is_verified_warehouse: row.is_verified_warehouse ?? null,
+    cj_review_count:
+      row.cj_review_count != null ? Number(row.cj_review_count) : null,
+    cj_review_avg_score:
+      row.cj_review_avg_score != null
+        ? Number(row.cj_review_avg_score)
+        : null,
   }));
 
   return (

@@ -3,7 +3,6 @@ import {
   cleanTitle,
   parseColorSize,
   parsePrice,
-  stripHtml,
   type CJVariantLike,
 } from "@/lib/cj-variant-parse";
 import {
@@ -13,6 +12,13 @@ import {
   resolveVariantShipsFromCountry,
   variantIsFastShipping,
 } from "@/lib/cj-shipping-origin";
+import { fetchCjProductReviewSummary } from "@/lib/cj-product-comments";
+import type { CjReviewSummary } from "@/lib/cj-product-comments";
+import { sanitizeCjDescription } from "@/lib/cj-description";
+import {
+  aggregateProductVerifiedWarehouse,
+  resolveVariantVerifiedWarehouse,
+} from "@/lib/cj-verified-warehouse";
 import type { StagedVariantJson } from "@/lib/staging-types";
 const CJ_API_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
 export const CJ_MARKUP_MULTIPLIER = 2;
@@ -160,6 +166,9 @@ export type StagedProductInsert = {
   search_keyword: string;
   ships_from_country: string | null;
   is_fast_shipping: boolean;
+  is_verified_warehouse: boolean | null;
+  cj_review_count: number | null;
+  cj_review_avg_score: number | null;
 };
 
 type FetchedCjProduct = {
@@ -364,7 +373,8 @@ export function buildStagedRow(
   coverImage: string | null,
   categoryId: string,
   keyword: string,
-  listShippingCountryCodes?: string[] | null
+  listShippingCountryCodes?: string[] | null,
+  reviewSummary?: CjReviewSummary | null
 ): StagedProductInsert {
   const stagedVariants: StagedVariantJson[] = variants.map((v) => {
     const cost =
@@ -375,6 +385,7 @@ export function buildStagedRow(
       v._stockRows,
       listShippingCountryCodes
     );
+    const isVerifiedWarehouse = resolveVariantVerifiedWarehouse(v.inventories);
     return {
       cj_variant_id: v.vid,
       color,
@@ -386,11 +397,16 @@ export function buildStagedRow(
       image_url: v.variantImage || coverImage,
       ships_from_country: shipsFrom,
       is_fast_shipping: variantIsFastShipping(shipsFrom),
+      is_verified_warehouse: isVerifiedWarehouse,
     };
   });
 
   const productShipping = aggregateProductShippingOrigin(
     stagedVariants.map((v) => v.ships_from_country)
+  );
+
+  const productVerified = aggregateProductVerifiedWarehouse(
+    stagedVariants.map((v) => v.is_verified_warehouse ?? null)
   );
 
   const costs = stagedVariants.map((v) => v.cost_price_usd).filter((c) => c > 0);
@@ -400,9 +416,11 @@ export function buildStagedRow(
       ? Math.min(...stagedVariants.map((v) => v.price_usd))
       : Math.round(minCost * CJ_MARKUP_MULTIPLIER * 100) / 100;
 
-  const description = detail.description
-    ? stripHtml(detail.description)
-    : `${cleanTitle(detail.productNameEn)} — ${detail.categoryName ?? "CJ Dropshipping"}`;
+  const description = sanitizeCjDescription(
+    detail.description,
+    cleanTitle(detail.productNameEn),
+    detail.categoryName ?? undefined
+  );
 
   return {
     cj_product_id: detail.pid,
@@ -416,6 +434,9 @@ export function buildStagedRow(
     search_keyword: keyword,
     ships_from_country: productShipping.ships_from_country,
     is_fast_shipping: productShipping.is_fast_shipping,
+    is_verified_warehouse: productVerified,
+    cj_review_count: reviewSummary?.count ?? null,
+    cj_review_avg_score: reviewSummary?.avgScore ?? null,
   };
 }
 export async function stageCjSearch(
@@ -453,7 +474,8 @@ export async function stageCjSearch(
     fetched.coverImage,
     category.id,
     keyword,
-    fetched.listShippingCountryCodes
+    fetched.listShippingCountryCodes,
+    await fetchCjProductReviewSummary(headers, fetched.detail.pid)
   );
 
   return persistStagedProduct(supabase, row);

@@ -9,6 +9,7 @@ export type StagedVariantJson = {
   image_url: string | null;
   ships_from_country: string | null;
   is_fast_shipping: boolean;
+  is_verified_warehouse: boolean | null;
 };
 
 export type StagedProduct = {
@@ -27,6 +28,9 @@ export type StagedProduct = {
   created_at: string;
   ships_from_country: string | null;
   is_fast_shipping: boolean;
+  is_verified_warehouse: boolean | null;
+  cj_review_count: number | null;
+  cj_review_avg_score: number | null;
 };
 export function parseStagedVariants(raw: unknown): StagedVariantJson[] {
   if (!Array.isArray(raw)) return [];
@@ -41,5 +45,6 @@ export function parseStagedVariants(raw: unknown): StagedVariantJson[] {
       ...v,
       ships_from_country: v.ships_from_country ?? null,
       is_fast_shipping: v.is_fast_shipping ?? false,
+      is_verified_warehouse: v.is_verified_warehouse ?? null,
     }));
 }

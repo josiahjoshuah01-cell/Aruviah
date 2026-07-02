@@ -7,6 +7,7 @@ import { VariantSelector } from "@/components/store/variant-selector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ProductDescription } from "@/components/store/product-description";
 import type { Category, Product } from "@/lib/types";
 import type { SerializableVariant } from "@/lib/variant-utils";
 import {
@@ -19,12 +20,17 @@ import {
 import {
   approveStagedProduct,
   rejectStagedProduct,
-} from "@/app/admin/staging/actions";
+} from "@/app/admin/staging/review-actions";
+import {
+  StagingCjReviewSignal,
+  StagingVerifiedWarehouseBadges,
+} from "@/components/admin/staging-quality-signals";
 
 function toPreviewProduct(
   item: StagedProduct,
   priceUsd: number,
-  categoryId: string | null
+  categoryId: string | null,
+  descriptionText: string
 ): Product {
   const variants = parseStagedVariants(item.variants);
   const first = variants[0];
@@ -32,7 +38,7 @@ function toPreviewProduct(
     id: item.id,
     category_id: categoryId,
     title: item.title,
-    description: item.description,
+    description: descriptionText.trim() || item.description,
     image_url: item.image_url,
     sold_count: 0,
     is_active: true,
@@ -68,6 +74,7 @@ export function StagedItemReview({
 }) {
   const [hidden, setHidden] = useState(false);
   const [price, setPrice] = useState(String(item.suggested_price_usd));
+  const [description, setDescription] = useState(item.description ?? "");
   const [categoryId, setCategoryId] = useState(
     item.suggested_category_id ?? categories[0]?.id ?? ""
   );
@@ -80,9 +87,11 @@ export function StagedItemReview({
   const previewProduct = toPreviewProduct(
     item,
     Number.isFinite(priceNum) ? priceNum : item.suggested_price_usd,
-    categoryId || null
+    categoryId || null,
+    description
   );
   const previewVariants = toPreviewVariants(item);
+  const stagedVariants = parseStagedVariants(item.variants);
   const variantCountries = previewVariants.map((v) => v.ships_from_country ?? null);
   const shipsFromLabel = formatShipsFromLabel(
     item.ships_from_country,
@@ -102,9 +111,19 @@ export function StagedItemReview({
       return;
     }
 
+    if (!description.trim()) {
+      toast.error("Enter a description");
+      return;
+    }
+
     startTransition(async () => {
       setHidden(true);
-      const result = await approveStagedProduct(item.id, priceNum, categoryId);
+      const result = await approveStagedProduct(
+        item.id,
+        priceNum,
+        categoryId,
+        description.trim()
+      );
       if (!result.ok) {
         setHidden(false);
         toast.error(result.error);
@@ -161,7 +180,16 @@ export function StagedItemReview({
             Mixed warehouse origins
           </span>
         )}
+        <StagingVerifiedWarehouseBadges
+          productVerified={item.is_verified_warehouse}
+          variants={stagedVariants}
+        />
       </div>
+
+      <StagingCjReviewSignal
+        count={item.cj_review_count}
+        avgScore={item.cj_review_avg_score}
+      />
 
       <div className="grid gap-8 xl:grid-cols-2">
         <div className="space-y-3">
@@ -214,6 +242,22 @@ export function StagedItemReview({
               </option>
             ))}
           </select>
+        </div>
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor={`description-${item.id}`}>Description</Label>
+          <textarea
+            id={`description-${item.id}`}
+            rows={12}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
+          />
+        </div>
+        <div className="space-y-2 md:col-span-2">
+          <Label>Description preview</Label>
+          <div className="rounded-md border border-border bg-muted/30 p-4">
+            <ProductDescription content={description} compact />
+          </div>
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor={`reject-${item.id}`}>

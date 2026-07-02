@@ -12,6 +12,8 @@ export type CJInventoryRow = {
   totalInventory?: number;
   cjInventory?: number;
   factoryInventory?: number;
+  /** 1=verified warehouse, 2=unverified */
+  verifiedWarehouse?: number;
 };
 
 export type CJStockRow = {

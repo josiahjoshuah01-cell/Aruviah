@@ -4,23 +4,39 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
+import { DisputeStatusBadge } from "@/components/admin/dispute-status-badge";
+import { OrderDisputePanel } from "@/components/admin/order-dispute-panel";
 import { CjPaymentNotice, CjPaymentStatusBadge } from "@/components/admin/cj-payment-notice";
+import { CjTrackingNotice } from "@/components/admin/cj-tracking-notice";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { updateOrderStatusAction } from "@/app/admin/orders/actions";
 import { ADMIN_UPDATABLE_STATUSES } from "@/lib/order-status";
 import type { AdminOrderDetail } from "@/lib/admin-queries";
+import type { LocalDisputeRow } from "@/lib/dispute-queries";
+import { canFileCjDispute } from "@/lib/cj-dispute-eligibility";
 import { formatPrice } from "@/lib/utils";
 import { formatVariantLabel } from "@/lib/variant-utils";
 import Link from "next/link";
 
-export function OrderDetailPanel({ order }: { order: AdminOrderDetail }) {
+export function OrderDetailPanel({
+  order,
+  disputes = [],
+}: {
+  order: AdminOrderDetail;
+  disputes?: LocalDisputeRow[];
+}) {
   const router = useRouter();
   const [status, setStatus] = useState(order.status);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const shipping = order.shipping;
+  const showDisputes = canFileCjDispute(order);
+  const activeDispute = disputes.find((d) => {
+    const s = d.status.toLowerCase();
+    return s === "processing" || s === "pending";
+  });
 
   function handleStatusUpdate() {
     startTransition(async () => {
@@ -53,6 +69,9 @@ export function OrderDetailPanel({ order }: { order: AdminOrderDetail }) {
           </p>
         </div>
         <OrderStatusBadge status={order.status} />
+        {activeDispute && (
+          <DisputeStatusBadge status={activeDispute.status} />
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -100,6 +119,22 @@ export function OrderDetailPanel({ order }: { order: AdminOrderDetail }) {
                 <dd className="font-mono text-xs">{order.tracking_number}</dd>
               </div>
             )}
+            {(order.cj_track_number ||
+              order.cj_tracking_provider ||
+              order.cj_tracking_url ||
+              order.cj_tracking_status) && (
+              <div className="pt-1">
+                <CjTrackingNotice
+                  compact
+                  trackNumber={order.cj_track_number}
+                  trackingProvider={order.cj_tracking_provider}
+                  trackingUrl={order.cj_tracking_url}
+                  trackingStatus={order.cj_tracking_status}
+                  lastMileCarrier={order.cj_last_mile_carrier}
+                  lastMileTrackNumber={order.cj_last_mile_track_number}
+                />
+              </div>
+            )}
             {order.fulfillment_note && (
               <div>
                 <dt className="text-muted-foreground">Fulfillment note</dt>
@@ -127,6 +162,23 @@ export function OrderDetailPanel({ order }: { order: AdminOrderDetail }) {
         paymentStatus={order.cj_payment_status}
         amountUsd={order.cj_order_amount_usd}
       />
+
+      <CjTrackingNotice
+        trackNumber={order.cj_track_number}
+        trackingProvider={order.cj_tracking_provider}
+        trackingUrl={order.cj_tracking_url}
+        trackingStatus={order.cj_tracking_status}
+        lastMileCarrier={order.cj_last_mile_carrier}
+        lastMileTrackNumber={order.cj_last_mile_track_number}
+      />
+
+      {showDisputes && order.cj_order_id && (
+        <OrderDisputePanel
+          orderId={order.id}
+          cjOrderId={order.cj_order_id}
+          disputes={disputes}
+        />
+      )}
 
       <section className="rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">

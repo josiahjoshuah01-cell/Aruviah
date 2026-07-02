@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
+import { CjPaymentNotice } from "@/components/admin/cj-payment-notice";
+import { CjTrackingNotice } from "@/components/admin/cj-tracking-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,6 +85,25 @@ function FulfillmentCard({ order }: { order: AdminOrderDetail }) {
             );
           })}
         </ul>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <CjPaymentNotice
+          compact
+          cjOrderId={order.cj_order_id}
+          shipmentOrderId={order.cj_shipment_order_id}
+          paymentStatus={order.cj_payment_status}
+          amountUsd={order.cj_order_amount_usd}
+        />
+        <CjTrackingNotice
+          compact
+          trackNumber={order.cj_track_number}
+          trackingProvider={order.cj_tracking_provider}
+          trackingUrl={order.cj_tracking_url}
+          trackingStatus={order.cj_tracking_status}
+          lastMileCarrier={order.cj_last_mile_carrier}
+          lastMileTrackNumber={order.cj_last_mile_track_number}
+        />
       </div>
 
       <div className="mt-4 space-y-3 border-t border-border pt-4">

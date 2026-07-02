@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { VariantSelector } from "@/components/store/variant-selector";
+import { ProductDescription } from "@/components/store/product-description";
 import { ProductReviews } from "@/components/store/product-reviews";
 import {
   getProductWithVariants,
@@ -60,14 +61,7 @@ export default async function ProductPage({
       />
 
       {product.description && (
-        <div className="mt-8 border-t border-border pt-8">
-          <h2 className="mb-3 font-display text-lg font-semibold">
-            Description
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            {product.description}
-          </p>
-        </div>
+        <ProductDescription content={product.description} />
       )}
 
       <ProductReviews productId={product.id} />

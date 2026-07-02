@@ -1,0 +1,29 @@
+---
+description: Supabase project guard — Aruviah only; never touch lunesalove.com or other projects
+alwaysApply: true
+---
+
+# Supabase: Aruviah project only
+
+**Canonical Aruviah project ref:** `jlbrfsnvzmzcrfaigseb`  
+**Canonical URL:** `https://jlbrfsnvzmzcrfaigseb.supabase.co` (from `.env.local`)
+
+## Forbidden project
+
+**Never** run MCP, CLI, or API writes against `bdzbfocqfnldkranofny` (`lunesalove.com`) or any other Supabase project.
+
+## Before any Supabase MCP call
+
+1. Read `NEXT_PUBLIC_SUPABASE_URL` from `.env.local` or `supabase/.temp/linked-project.json`.
+2. Confirm `project_id` / `--project-ref` / `--linked` resolves to **`jlbrfsnvzmzcrfaigseb`**.
+3. If `list_projects` returns only `bdzbfocqfnldkranofny`, **do not** treat that as Aruviah — MCP is scoped to a different org. Use **Supabase CLI** (`npx supabase db push --linked`, `npx supabase db query --linked`) instead of MCP for Aruviah.
+
+## Write operations (migrations, DDL, DELETE, DROP)
+
+- **Require** explicit project ref `jlbrfsnvzmzcrfaigseb` in the tool arguments.
+- **Prefer** `npx supabase db push --linked` over MCP `apply_migration` for this repo.
+- **Abort** if `project_id !== jlbrfsnvzmzcrfaigseb` unless the user explicitly requests another project.
+
+## MCP limitation
+
+The Cursor Supabase plugin MCP authenticates to the **Lunesa Love** org and `list_projects` may only show `bdzbfocqfnldkranofny`. Aruviah lives in a **different org** (`jtvabykapduegkipahxh`). Do not infer the active project from `list_projects` alone.
