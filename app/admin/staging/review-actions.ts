@@ -71,6 +71,14 @@ export async function approveStagedProduct(
     suggestedPriceUsd
   );
 
+  const missingOrigin = pricedVariants.filter((v) => !v.ships_from_country?.trim());
+  if (missingOrigin.length > 0) {
+    return {
+      ok: false as const,
+      error: `Cannot approve: ${missingOrigin.length} variant(s) have unknown warehouse origin (ships_from_country). Re-stage after CJ stock enrichment.`,
+    };
+  }
+
   const { data: product, error: productError } = await supabase
     .from("products")
     .insert({

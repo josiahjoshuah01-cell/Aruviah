@@ -167,7 +167,9 @@ export function VariantSelector({
             </p>
             {selectedVariant.shipping_cost_usd > 0 && (
               <p className="text-sm text-muted-foreground">
-                + {formatPrice(selectedVariant.shipping_cost_usd)} shipping
+                Estimated shipping: ~{formatPrice(selectedVariant.shipping_cost_usd)}
+                {" — "}
+                final cost calculated at checkout based on your address
               </p>
             )}
             {deliveryLine && (

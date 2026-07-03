@@ -1,0 +1,56 @@
+{
+  "tests": [
+    {
+      "name": "single-origin cart → US",
+      "ok": false,
+      "error": "No shippable CJ variant found in first 15 candidates — CJ may be rate-limited or catalog lacks US routes"
+    },
+    {
+      "name": "mixed-origin cart → US",
+      "origins": [
+        "CN",
+        "US"
+      ],
+      "ok": true,
+      "groupCount": 2,
+      "groups": [
+        {
+          "fromCountryCode": "CN",
+          "destinationCountryCode": "US",
+          "shippingUsd": 11.25,
+          "logisticName": "YunExpress Ordinary",
+          "itemCount": 1,
+          "variantIds": [
+            "75e9aecd-200d-4de0-8592-5cb5299f548d"
+          ]
+        },
+        {
+          "fromCountryCode": "US",
+          "destinationCountryCode": "US",
+          "shippingUsd": 0,
+          "logisticName": "USPS US to US #106",
+          "itemCount": 1,
+          "variantIds": [
+            "39b4dc06-fb73-4007-955e-8db1f9191529"
+          ]
+        }
+      ],
+      "shippingTotal": 11.25,
+      "groupSumMatchesTotal": true
+    },
+    {
+      "name": "unservable destination (KP)",
+      "ok": false,
+      "error": "Some items cannot ship to KP",
+      "unshippableItems": [
+        {
+          "variantId": "5b485b60-4e58-49aa-8f96-276e67f1e762",
+          "title": "Manual Slow Cooker, Easy To Use Program-Free Kitchen Appliance, Great For Pot Roast And Chili",
+          "sku": "ARV-00156",
+          "fromCountryCode": "CN",
+          "destinationCountry": "KP"
+        }
+      ]
+    }
+  ]
+}

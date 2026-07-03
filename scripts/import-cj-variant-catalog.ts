@@ -7,6 +7,12 @@
 import { readFileSync, existsSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
+import { enrichCjVariants } from "../lib/cj-staging";
+import {
+  resolveVariantShipsFromCountry,
+  variantIsFastShipping,
+} from "../lib/cj-shipping-origin";
+import type { CJStockRow } from "../lib/cj-shipping-origin";
 
 const CJ_API_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
 const MARKUP_MULTIPLIER = 2;
@@ -51,7 +57,8 @@ type CJVariant = {
   variantStandard?: string;
   variantKeyList?: CJVariantKey[];
   freight?: number | string;
-  inventories?: Array<{ totalInventory?: number }>;
+  inventories?: Array<{ totalInventory?: number; countryCode?: string }>;
+  _stockRows?: CJStockRow[];
 };
 
 type CJProductDetail = {
@@ -468,19 +475,11 @@ async function main() {
 
         if (detail.variants.length < MIN_VARIANTS) continue;
 
-        const enrichedVariants: CJVariant[] = [];
-        for (const v of detail.variants.slice(0, 24)) {
-          if (!v.vid) continue;
-          await sleep(200);
-          const vidUrl = `${CJ_API_BASE}/product/variant/queryByVid?vid=${encodeURIComponent(v.vid)}&features=enable_inventory`;
-          const vidBody = (await fetch(vidUrl, { headers }).then((r) => r.json())) as CJApiEnvelope<CJVariant>;
-          (log.api_calls as number)++;
-          if (vidBody.code === 200 && vidBody.data) {
-            enrichedVariants.push({ ...v, ...vidBody.data });
-          } else {
-            enrichedVariants.push(v);
-          }
-        }
+        const enrichedVariants = await enrichCjVariants(
+          headers,
+          detail,
+          detail.variants
+        );
 
         const withPrice = enrichedVariants.filter(
           (v) =>
@@ -547,6 +546,15 @@ async function main() {
       const sku = `ARV-${String(skuCounter).padStart(5, "0")}`;
       skuCounter++;
 
+      const shipsFrom = resolveVariantShipsFromCountry(
+        v.inventories,
+        v._stockRows,
+        null
+      );
+      if (!shipsFrom) {
+        continue;
+      }
+
       variantRows.push({
         product_id: product.id,
         cj_variant_id: v.vid,
@@ -558,13 +566,15 @@ async function main() {
         stock: variantStock(v),
         image_url: v.variantImage || coverImage,
         is_active: true,
+        ships_from_country: shipsFrom,
+        is_fast_shipping: variantIsFastShipping(shipsFrom),
       });
     }
 
     if (variantRows.length < MIN_VARIANTS) {
       await supabase.from("products").delete().eq("id", product.id);
       (log.errors as string[]).push(
-        `Too few priced variants for ${picked.detail.pid}, rolled back`
+        `Too few priced variants with resolved warehouse origin for ${picked.detail.pid}, rolled back`
       );
       continue;
     }

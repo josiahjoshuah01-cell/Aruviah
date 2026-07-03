@@ -44,6 +44,7 @@ function CategoryPill({
   return (
     <Link
       href={href}
+      suppressHydrationWarning
       className={cn(
         "relative shrink-0 scroll-ml-4 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream",
         isActive

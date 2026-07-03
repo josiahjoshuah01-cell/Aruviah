@@ -16,8 +16,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   useCartStore,
   selectCartSubtotal,
-  selectCartShipping,
-  selectCartTotalPrice,
 } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
 import { formatVariantLabel } from "@/lib/variant-utils";
@@ -27,8 +25,6 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore(selectCartSubtotal);
-  const shipping = useCartStore(selectCartShipping);
-  const total = useCartStore(selectCartTotalPrice);
   const updateQty = useCartStore((s) => s.updateQty);
   const removeItem = useCartStore((s) => s.removeItem);
 
@@ -77,15 +73,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
-                <span className="tabular-price">
-                  {shipping > 0 ? formatPrice(shipping) : "—"}
-                </span>
-              </div>
-              <div className="flex justify-between pt-1 font-medium">
-                <span>Total</span>
-                <span className="tabular-price text-lg">
-                  {formatPrice(total)}
-                </span>
+                <span className="text-muted-foreground">Calculated at checkout</span>
               </div>
             </div>
             <Button asChild className="w-full" disabled={hasUnavailable}>
@@ -163,7 +151,7 @@ function CartLineItem({
           </p>
         )}
         <p className="tabular-price text-sm font-medium">
-          {formatPrice(item.price + item.shippingCost)}
+          {formatPrice(item.price)}
         </p>
         <div className="flex items-center gap-2">
           <button

@@ -346,6 +346,13 @@ export async function persistStagedProduct(
   supabase: SupabaseClient,
   row: StagedProductInsert
 ): Promise<StagedProductInsert> {
+  const missingOrigin = row.variants.filter((v) => !v.ships_from_country?.trim());
+  if (missingOrigin.length > 0) {
+    throw new Error(
+      `Cannot stage product ${row.cj_product_id}: ${missingOrigin.length} variant(s) missing ships_from_country after CJ stock lookup`
+    );
+  }
+
   const { data: live } = await supabase
     .from("products")
     .select("id")

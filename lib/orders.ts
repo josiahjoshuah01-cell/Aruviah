@@ -1,5 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/admin";
 import { createCJOrder, type CJOrderResult } from "@/lib/cj";
+import { calculateCheckoutShipping } from "@/lib/checkout-shipping";
 import { verifyCjLiveStockAtCheckout } from "@/lib/cj-stock";
 import { parseCjOrderAmountUsd, tryAutoPayCjOrder } from "@/lib/cj-payment";
 import type { CartItemInput, ShippingAddress } from "@/lib/validations";
@@ -16,6 +17,19 @@ export type ResolvedCartItem = {
   stock: number;
 };
 
+export type ResolvedCart = {
+  items: ResolvedCartItem[];
+  subtotal: number;
+  shippingTotal: number;
+  total: number;
+};
+
+export type CheckoutQuote = {
+  subtotal: number;
+  shippingTotal: number;
+  total: number;
+};
+
 export async function getExistingOrderByPaypalId(
   paypalOrderId: string
 ): Promise<string | null> {
@@ -29,15 +43,16 @@ export async function getExistingOrderByPaypalId(
 }
 
 export async function resolveCartItems(
-  items: CartItemInput[]
-): Promise<{ items: ResolvedCartItem[]; total: number } | { error: string }> {
+  items: CartItemInput[],
+  destinationCountry: string
+): Promise<ResolvedCart | { error: string; unshippableItems?: unknown[] }> {
   const supabase = createServiceClient();
   const variantIds = items.map((i) => i.variantId);
 
   const { data: variants, error } = await supabase
     .from("product_variants")
     .select(
-      "id, product_id, price_usd, shipping_cost_usd, cost_price_usd, stock, sku, is_active, product:products(id, title, is_active)"
+      "id, product_id, price_usd, cost_price_usd, stock, sku, is_active, product:products(id, title, is_active)"
     )
     .in("id", variantIds);
 
@@ -45,9 +60,20 @@ export async function resolveCartItems(
     return { error: "Failed to fetch product variants" };
   }
 
+  const shippingResult = await calculateCheckoutShipping(
+    items,
+    destinationCountry
+  );
+  if (!shippingResult.ok) {
+    return {
+      error: shippingResult.error,
+      unshippableItems: shippingResult.unshippableItems,
+    };
+  }
+
   const variantMap = new Map(variants.map((v) => [v.id, v]));
   const resolved: ResolvedCartItem[] = [];
-  let total = 0;
+  let subtotal = 0;
 
   for (const item of items) {
     const variant = variantMap.get(item.variantId);
@@ -63,17 +89,16 @@ export async function resolveCartItems(
     }
 
     const price = Number(variant.price_usd);
-    const shippingCost = Number(variant.shipping_cost_usd);
     const costPrice =
       variant.cost_price_usd != null ? Number(variant.cost_price_usd) : null;
-    total += (price + shippingCost) * item.qty;
+    subtotal += price * item.qty;
 
     resolved.push({
       variantId: variant.id,
       productId: variant.product_id,
       qty: item.qty,
       price,
-      shippingCost,
+      shippingCost: 0,
       costPrice,
       sku: variant.sku,
       title: product.title,
@@ -81,7 +106,14 @@ export async function resolveCartItems(
     });
   }
 
-  return { items: resolved, total };
+  const { shippingTotal, total } = shippingResult.quote;
+
+  return {
+    items: resolved,
+    subtotal,
+    shippingTotal,
+    total,
+  };
 }
 
 export async function savePendingCheckout(params: {
@@ -89,6 +121,7 @@ export async function savePendingCheckout(params: {
   userId: string;
   items: CartItemInput[];
   shippingCountry: string;
+  quote: CheckoutQuote;
 }): Promise<void> {
   const supabase = createServiceClient();
   const { error } = await supabase.from("paypal_checkout_pending").upsert(
@@ -97,6 +130,7 @@ export async function savePendingCheckout(params: {
       user_id: params.userId,
       items: params.items,
       shipping_country: params.shippingCountry,
+      quote: params.quote,
     },
     { onConflict: "paypal_order_id" }
   );
@@ -131,6 +165,7 @@ type PendingCheckout = {
   items: CartItemInput[];
   shipping: ShippingAddress | null;
   shipping_country: string;
+  quote: CheckoutQuote | null;
 };
 
 async function getPendingCheckout(
@@ -139,7 +174,7 @@ async function getPendingCheckout(
   const supabase = createServiceClient();
   const { data } = await supabase
     .from("paypal_checkout_pending")
-    .select("user_id, items, shipping, shipping_country")
+    .select("user_id, items, shipping, shipping_country, quote")
     .eq("paypal_order_id", paypalOrderId)
     .maybeSingle();
 
@@ -149,6 +184,7 @@ async function getPendingCheckout(
     items: data.items as CartItemInput[],
     shipping: data.shipping as ShippingAddress | null,
     shipping_country: data.shipping_country,
+    quote: (data.quote as CheckoutQuote | null) ?? null,
   };
 }
 
@@ -240,18 +276,21 @@ export async function fulfillOrder(params: {
   userId: string;
   items: CartItemInput[];
   shipping: ShippingAddress;
+  /** PayPal-captured amount — honored when within drift threshold at capture. */
+  orderTotalUsd?: number;
 }): Promise<{ orderId: string } | { error: string }> {
   const existingId = await getExistingOrderByPaypalId(params.paypalOrderId);
   if (existingId) {
     return { orderId: existingId };
   }
 
-  const resolved = await resolveCartItems(params.items);
+  const resolved = await resolveCartItems(params.items, params.shipping.country);
   if ("error" in resolved) {
     return { error: resolved.error };
   }
 
-  const { items, total } = resolved;
+  const { items, total: computedTotal } = resolved;
+  const total = params.orderTotalUsd ?? computedTotal;
   const supabase = createServiceClient();
 
   const rpcItems = items.map((item) => ({

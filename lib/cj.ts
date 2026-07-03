@@ -50,6 +50,7 @@ export type CJShipping = {
   city: string;
   country: string;
   phone: string;
+  zip?: string;
 };
 
 export type CJOrderInput = {
@@ -164,6 +165,9 @@ export type CjTrackInfoData = {
 let tokenCache: CJTokenCache | null = null;
 let resolveInFlight: Promise<string | null> | null = null;
 let lastGetAccessTokenAt = 0;
+let lastFreightCalculateAt = 0;
+
+const FREIGHT_CALCULATE_MIN_INTERVAL_MS = 1100;
 
 const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   "united states": "US",
@@ -231,7 +235,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function toCountryCode(country: string): string {
+export function toCountryCode(country: string): string {
   const trimmed = country.trim();
   if (trimmed.length === 2) return trimmed.toUpperCase();
   const mapped = COUNTRY_NAME_TO_CODE[trimmed.toLowerCase()];
@@ -394,7 +398,9 @@ export type CjFreightProduct = {
 };
 
 /** CJ createOrderV2 fromCountryCode from stored variant warehouse origin. */
-function warehouseFromCountryCode(shipsFrom: string | null | undefined): string {
+export function warehouseFromCountryCode(
+  shipsFrom: string | null | undefined
+): string {
   const code = shipsFrom?.trim().toUpperCase();
   if (!code) {
     return process.env.CJ_FROM_COUNTRY_CODE?.trim() || "CN";
@@ -477,7 +483,7 @@ function buildCreateOrderPayload(
 
   return {
     orderNumber: order.orderId,
-    shippingZip: "",
+    shippingZip: shipping.zip?.trim() ?? "",
     shippingCountry: shipping.country,
     shippingCountryCode: countryCode,
     shippingProvince: "",
@@ -775,72 +781,99 @@ export async function getValidLogisticsOptions(
 
   if (normalizedProducts.length === 0) return [];
 
-  try {
-    const res = await fetch(`${CJ_API_BASE}/logistic/freightCalculate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "CJ-Access-Token": token,
-      },
-      body: JSON.stringify({
-        startCountryCode: startCountryCode.trim().toUpperCase(),
-        endCountryCode: endCountryCode.trim().toUpperCase(),
-        products: normalizedProducts,
-      }),
-    });
+  const payload = {
+    startCountryCode: startCountryCode.trim().toUpperCase(),
+    endCountryCode: endCountryCode.trim().toUpperCase(),
+    products: normalizedProducts,
+  };
 
-    const body = (await res.json()) as CJApiEnvelope<
-      Array<{
-        logisticName?: string;
-        logisticPrice?: number | string;
-        logisticPriceCn?: number | string;
-        logisticAging?: string;
-        taxesFee?: number | string;
-        clearanceOperationFee?: number | string;
-        totalPostageFee?: number | string;
-      }>
-    >;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const now = Date.now();
+    const waitMs =
+      FREIGHT_CALCULATE_MIN_INTERVAL_MS - (now - lastFreightCalculateAt);
+    if (waitMs > 0) {
+      await sleep(waitMs);
+    }
+    lastFreightCalculateAt = Date.now();
 
-    if (!res.ok || body.code !== 200 || !body.result || !Array.isArray(body.data)) {
-      console.error(
-        "[CJ] freightCalculate failed:",
-        JSON.stringify({
-          httpStatus: res.status,
-          code: body.code,
-          message: body.message,
-          products: normalizedProducts.map((p) => p.vid),
-          startCountryCode,
-          endCountryCode,
-        })
-      );
+    try {
+      const res = await fetch(`${CJ_API_BASE}/logistic/freightCalculate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "CJ-Access-Token": token,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const body = (await res.json()) as CJApiEnvelope<
+        Array<{
+          logisticName?: string;
+          logisticPrice?: number | string;
+          logisticPriceCn?: number | string;
+          logisticAging?: string;
+          taxesFee?: number | string;
+          clearanceOperationFee?: number | string;
+          totalPostageFee?: number | string;
+        }>
+      >;
+
+      const rateLimited = res.status === 429 || body.code === 1600200;
+      if (rateLimited && attempt === 0) {
+        console.warn("[CJ] freightCalculate rate limited — retrying");
+        continue;
+      }
+
+      if (
+        !res.ok ||
+        body.code !== 200 ||
+        !body.result ||
+        !Array.isArray(body.data)
+      ) {
+        console.error(
+          "[CJ] freightCalculate failed:",
+          JSON.stringify({
+            httpStatus: res.status,
+            code: body.code,
+            message: body.message,
+            products: normalizedProducts.map((p) => p.vid),
+            startCountryCode,
+            endCountryCode,
+          })
+        );
+        return [];
+      }
+
+      return body.data
+        .filter((row) => row.logisticName?.trim())
+        .map((row) => ({
+          logisticName: row.logisticName!.trim(),
+          logisticPrice: parseFloat(String(row.logisticPrice ?? 0)) || 0,
+          logisticPriceCn:
+            row.logisticPriceCn != null
+              ? parseFloat(String(row.logisticPriceCn)) || null
+              : null,
+          logisticAging: row.logisticAging?.trim() || null,
+          taxesFee:
+            row.taxesFee != null
+              ? parseFloat(String(row.taxesFee)) || null
+              : null,
+          clearanceOperationFee:
+            row.clearanceOperationFee != null
+              ? parseFloat(String(row.clearanceOperationFee)) || null
+              : null,
+          totalPostageFee:
+            row.totalPostageFee != null
+              ? parseFloat(String(row.totalPostageFee)) || null
+              : null,
+        }));
+    } catch (err) {
+      console.error("[CJ] freightCalculate request error:", err);
       return [];
     }
-
-    return body.data
-      .filter((row) => row.logisticName?.trim())
-      .map((row) => ({
-        logisticName: row.logisticName!.trim(),
-        logisticPrice: parseFloat(String(row.logisticPrice ?? 0)) || 0,
-        logisticPriceCn:
-          row.logisticPriceCn != null
-            ? parseFloat(String(row.logisticPriceCn)) || null
-            : null,
-        logisticAging: row.logisticAging?.trim() || null,
-        taxesFee:
-          row.taxesFee != null ? parseFloat(String(row.taxesFee)) || null : null,
-        clearanceOperationFee:
-          row.clearanceOperationFee != null
-            ? parseFloat(String(row.clearanceOperationFee)) || null
-            : null,
-        totalPostageFee:
-          row.totalPostageFee != null
-            ? parseFloat(String(row.totalPostageFee)) || null
-            : null,
-      }));
-  } catch (err) {
-    console.error("[CJ] freightCalculate request error:", err);
-    return [];
   }
+
+  return [];
 }
 
 /** GET /logistic/trackInfo — live carrier status for a tracking number. */

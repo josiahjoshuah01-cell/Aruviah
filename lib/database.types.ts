@@ -121,6 +121,7 @@ export type Database = {
           created_at: string | null
           items: Json
           paypal_order_id: string
+          quote: Json | null
           shipping: Json | null
           shipping_country: string
           user_id: string
@@ -129,6 +130,7 @@ export type Database = {
           created_at?: string | null
           items: Json
           paypal_order_id: string
+          quote?: Json | null
           shipping?: Json | null
           shipping_country: string
           user_id: string
@@ -137,6 +139,7 @@ export type Database = {
           created_at?: string | null
           items?: Json
           paypal_order_id?: string
+          quote?: Json | null
           shipping?: Json | null
           shipping_country?: string
           user_id?: string

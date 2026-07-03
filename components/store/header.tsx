@@ -35,6 +35,7 @@ export function Header({ isAdmin = false, isLoggedIn = false }: HeaderProps) {
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:gap-6 md:px-6">
         <Link
           href="/"
+          suppressHydrationWarning
           className="font-display text-xl font-bold tracking-tight text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
         >
           Aruviah
@@ -61,6 +62,7 @@ export function Header({ isAdmin = false, isLoggedIn = false }: HeaderProps) {
           </CartDrawer>
           <Link
             href="/account/orders"
+            suppressHydrationWarning
             className="hidden text-sm text-muted-foreground hover:text-current sm:inline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream rounded px-2 py-1"
           >
             Orders
@@ -68,6 +70,7 @@ export function Header({ isAdmin = false, isLoggedIn = false }: HeaderProps) {
           {isAdmin && (
             <Link
               href="/admin/staging"
+              suppressHydrationWarning
               className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-stream hover:text-stream/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
               title="Admin staging"
             >
@@ -86,6 +89,7 @@ export function Header({ isAdmin = false, isLoggedIn = false }: HeaderProps) {
           ) : (
             <Link
               href="/login"
+              suppressHydrationWarning
               className="hidden text-sm text-muted-foreground hover:text-current sm:inline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream rounded px-2 py-1"
             >
               Sign in

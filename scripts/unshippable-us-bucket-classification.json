@@ -1,0 +1,1128 @@
+{
+  "generatedAt": "2026-07-03T03:18:17.372Z",
+  "total": 43,
+  "counts": {
+    "A": 41,
+    "B": 1,
+    "C": 1
+  },
+  "bucketDefinitions": {
+    "A": "US warehouse stock + valid US→US route (or other fixable wrong origin) — ships_from_country data fix",
+    "B": "No US stock; ships from non-US warehouse; no route from that origin → US — CJ limitation",
+    "C": "Has stock but zero valid routes to US from any warehouse origin — dead for US market"
+  },
+  "classifications": [
+    {
+      "sku": "ARV-00156",
+      "title": "Manual Slow Cooker, Easy To Use Program-Free Kitchen Appliance, Great For Pot Roast And Chili",
+      "vid": "2071774536144416770",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 1748
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 10,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (1748 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00157",
+      "title": "Manual Slow Cooker, Easy To Use Program-Free Kitchen Appliance, Great For Pot Roast And Chili",
+      "vid": "2071774536144416771",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 508
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 10,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (508 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00161",
+      "title": "Mini Portable Karaoke Machine With Wireless Microphones",
+      "vid": "2069323160031891460",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00163",
+      "title": "Mini Portable Karaoke Machine With Wireless Microphones",
+      "vid": "2069323160031891462",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00166",
+      "title": "Human Dog Bed - 63 In X 31.4 In X 9.5 In Washable Faux Fur Lounger For Adults & Pets, Cushion With Orthopedic Support, Includes Pillow & Blanket",
+      "vid": "2071444663717695492",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 10
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 1,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (10 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00169",
+      "title": "Kitchen Cart With Storage And Drop Leaf Tabletop, Rolling Island On Wheels For Extra Workspace",
+      "vid": "2071768702989144067",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 1632
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 13,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (1632 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00170",
+      "title": "To God Be The Glory Gold Print Women Men T-Shirt, Summer Casual Round Neck Short Sleeve Top",
+      "vid": "2071402976045346817",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 107
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (107 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00172",
+      "title": "To God Be The Glory Gold Print Women Men T-Shirt, Summer Casual Round Neck Short Sleeve Top",
+      "vid": "2071402976045346819",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 138
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (138 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00174",
+      "title": "Women's Large-Capacity, Lightweight, Soft-Touch Marshmallow-Style Stand-Up Travel Cosmetic & Toiletry Bag With 4 Compartments And Zipper Closure",
+      "vid": "2071796796735127554",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 50
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 3,
+          "cheapestUsd": 0,
+          "logisticName": "USPS US to US #135",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (50 units) + US→US route (USPS US to US #135, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00176",
+      "title": "Household Portable Vacuum Cleaner, With Automatic Power Cord Retraction, Without Bag Type, Equipped With Washable HEPA Filter",
+      "vid": "2069701153179222018",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 4978
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 16,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (4978 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00139",
+      "title": "Outdoor Rocking Chairs, Foldable Reclining Zero Gravity Lounge Rocker With Pillow, Cup & Phone Holder, Combo Design With Folding Legs, Black",
+      "vid": "2071433107051626498",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 134
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 6,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #5",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (134 units) + US→US route (Fedex US to US #5, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00137",
+      "title": "Smart Scale For Body Weight, Body Pod Scale, 8-Electrode Body Composition Scale With BMI, Body Fat, Muscle Mass, Digital Bathroom Scale With Larger Platform, Bluetooth",
+      "vid": "2070159544226643970",
+      "ships_from_country": "US",
+      "storedFromCode": "US",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 1
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 0,
+          "cheapestUsd": null,
+          "logisticName": null,
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "C",
+      "bucketReason": "US warehouse stock (1 units) but zero US→US carriers — dead for US"
+    },
+    {
+      "sku": "ARV-00138",
+      "title": "USB C Charger Block, Charger Block 24W PD Power Adapter",
+      "vid": "2069951802154856450",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 194
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (194 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00140",
+      "title": "Headlight Headlamp S Witch Black For Chrysler Dodge With Power Mirrors",
+      "vid": "2069660442140393473",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 3,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00141",
+      "title": "Human Dog Bed - 63 In X 31.4 In X 9.5 In Washable Faux Fur Lounger For Adults & Pets, Cushion With Orthopedic Support, Includes Pillow & Blanket",
+      "vid": "2071444663717695489",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 20
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 1,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (20 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00142",
+      "title": "Gray Dash Mat Cover Compatible - 2007-2012 Santa Fe Center Storage On Dash",
+      "vid": "2071793273930809346",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 3,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00143",
+      "title": "Cute Animal Shape Wall Hanging Hook Coat Hat Clothes Rack Hooks Decoration For Bathroom Bedroom",
+      "vid": "2069685104853159938",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 5
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "USPS US to US #11",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (5 units) + US→US route (USPS US to US #11, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00144",
+      "title": "Elevated Dog Bed For Large Dogs XL, Raised Dog Bed Cot With Washable Pillow, Indoor & Outdoor Cooling Dog Bed Hammock, Heavy Duty Steel Frame Dog Bed With Breathable Teslin Mesh, Grey",
+      "vid": "2071850259903311873",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 40
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 1,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (40 units) + US→US route (Fedex US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00145",
+      "title": "Manual Slow Cooker, Easy To Use Program-Free Kitchen Appliance, Great For Pot Roast And Chili",
+      "vid": "2071774536144416769",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 1216
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 10,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (1216 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00146",
+      "title": "For T Oyota 2018-2022 Camry Sedan MUG Style Window Visors Rain Sun Guard Vent 4Pc",
+      "vid": "2071856840625393666",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 3,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00148",
+      "title": "Electric Hot Pot Non-Stick Frying Pan Portable Rapid Noodles Cooker With Long Handle Steamer Spatula Dual Power Control Overheat Dry-Boil Protection For College Dorm Room Essential",
+      "vid": "2046132306452963330",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 230
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 4,
+          "cheapestUsd": 0,
+          "logisticName": "Yunexpress US to US #8",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (230 units) + US→US route (Yunexpress US to US #8, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00149",
+      "title": "Grey Carpet Dash Mat Compatible With T Oyota Camry 1992-1993 Dash Cover",
+      "vid": "2071795699033731073",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 3,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00151",
+      "title": "Women's Large-Capacity, Lightweight, Soft-Touch Marshmallow-Style Stand-Up Travel Cosmetic & Toiletry Bag With 4 Compartments And Zipper Closure",
+      "vid": "2071796796735127554",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 50
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 3,
+          "cheapestUsd": 0,
+          "logisticName": "USPS US to US #135",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (50 units) + US→US route (USPS US to US #135, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00152",
+      "title": "5in1 Sunglasses Travel Case Organizer Hangable, Eyeglasses Foldable Storage Organizer",
+      "vid": "2052305308424450049",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 124
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "UNI US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (124 units) + US→US route (UNI US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00155",
+      "title": "Manual Slow Cooker, Easy To Use Program-Free Kitchen Appliance, Great For Pot Roast And Chili",
+      "vid": "2071774536144416769",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 1216
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 10,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (1216 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00158",
+      "title": "Manual Slow Cooker, Easy To Use Program-Free Kitchen Appliance, Great For Pot Roast And Chili",
+      "vid": "2071774536144416772",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 868
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 10,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (868 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00159",
+      "title": "Mini Portable Karaoke Machine With Wireless Microphones",
+      "vid": "2069323160031891458",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00160",
+      "title": "Mini Portable Karaoke Machine With Wireless Microphones",
+      "vid": "2069323160031891459",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00162",
+      "title": "Mini Portable Karaoke Machine With Wireless Microphones",
+      "vid": "2069323160031891461",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 30
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (30 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00164",
+      "title": "Human Dog Bed - 63 In X 31.4 In X 9.5 In Washable Faux Fur Lounger For Adults & Pets, Cushion With Orthopedic Support, Includes Pillow & Blanket",
+      "vid": "2071444663717695489",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 20
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 1,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (20 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00167",
+      "title": "Human Dog Bed - 63 In X 31.4 In X 9.5 In Washable Faux Fur Lounger For Adults & Pets, Cushion With Orthopedic Support, Includes Pillow & Blanket",
+      "vid": "2071444663717695493",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 5
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 1,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (5 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00171",
+      "title": "To God Be The Glory Gold Print Women Men T-Shirt, Summer Casual Round Neck Short Sleeve Top",
+      "vid": "2071402976045346818",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 147
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (147 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00173",
+      "title": "To God Be The Glory Gold Print Women Men T-Shirt, Summer Casual Round Neck Short Sleeve Top",
+      "vid": "2071402976045346820",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 135
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 5,
+          "cheapestUsd": 0,
+          "logisticName": "SpeedX US to US #2",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (135 units) + US→US route (SpeedX US to US #2, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00175",
+      "title": "Women's Large-Capacity, Lightweight, Soft-Touch Marshmallow-Style Stand-Up Travel Cosmetic & Toiletry Bag With 4 Compartments And Zipper Closure",
+      "vid": "2071796796735127555",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 50
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 3,
+          "cheapestUsd": 0,
+          "logisticName": "USPS US to US #135",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (50 units) + US→US route (USPS US to US #135, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00177",
+      "title": "Household Portable Vacuum Cleaner, With Automatic Power Cord Retraction, Without Bag Type, Equipped With Washable HEPA Filter",
+      "vid": "2069701153179222019",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 2468
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 16,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (2468 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00185",
+      "title": "Black Backless, Thin Shoulder Strap One-piece Fitness Suit, Slimming And Abdominal Reduction, Elastic Dance, Running, And Versatile Home One-piece Shorts",
+      "vid": "2071864800873320451",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 50
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 2,
+          "cheapestUsd": 0,
+          "logisticName": "USPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (50 units) + US→US route (USPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00186",
+      "title": "Black Backless, Thin Shoulder Strap One-piece Fitness Suit, Slimming And Abdominal Reduction, Elastic Dance, Running, And Versatile Home One-piece Shorts",
+      "vid": "2071864800873320452",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 50
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 2,
+          "cheapestUsd": 0,
+          "logisticName": "USPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (50 units) + US→US route (USPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00147",
+      "title": "Vertical Lumber Cutting Guide For Chainsaw Portable Aluminum Alloy Wood Cutter Tool Accessories Wood Timber Milling Attachment",
+      "vid": "2069328499217305601",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [],
+      "originFreight": [
+        {
+          "fromCountryCode": "CN",
+          "optionCount": 0,
+          "cheapestUsd": null,
+          "logisticName": null,
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "B",
+      "bucketReason": "No CJ warehouse stock recorded; no freight route from CN fallback → US"
+    },
+    {
+      "sku": "ARV-00165",
+      "title": "Human Dog Bed - 63 In X 31.4 In X 9.5 In Washable Faux Fur Lounger For Adults & Pets, Cushion With Orthopedic Support, Includes Pillow & Blanket",
+      "vid": "2071444663717695490",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 1
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 1,
+          "cheapestUsd": 0,
+          "logisticName": "UPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (1 units) + US→US route (UPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00168",
+      "title": "Kitchen Cart With Storage And Drop Leaf Tabletop, Rolling Island On Wheels For Extra Workspace",
+      "vid": "2071768702989144066",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 710
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 13,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (710 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00178",
+      "title": "Household Portable Vacuum Cleaner, With Automatic Power Cord Retraction, Without Bag Type, Equipped With Washable HEPA Filter",
+      "vid": "2069701153179222020",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 2364
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 16,
+          "cheapestUsd": 0,
+          "logisticName": "Fedex US to US #37",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (2364 units) + US→US route (Fedex US to US #37, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00183",
+      "title": "Black Backless, Thin Shoulder Strap One-piece Fitness Suit, Slimming And Abdominal Reduction, Elastic Dance, Running, And Versatile Home One-piece Shorts",
+      "vid": "2071864800873320449",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 50
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 2,
+          "cheapestUsd": 0,
+          "logisticName": "USPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (50 units) + US→US route (USPS US to US, $0.00) — fix ships_from_country to US"
+    },
+    {
+      "sku": "ARV-00184",
+      "title": "Black Backless, Thin Shoulder Strap One-piece Fitness Suit, Slimming And Abdominal Reduction, Elastic Dance, Running, And Versatile Home One-piece Shorts",
+      "vid": "2071864800873320450",
+      "ships_from_country": null,
+      "storedFromCode": "CN",
+      "warehouses": [
+        {
+          "countryCode": "US",
+          "areaEn": "US Warehouse",
+          "totalInventory": 50
+        }
+      ],
+      "originFreight": [
+        {
+          "fromCountryCode": "US",
+          "optionCount": 2,
+          "cheapestUsd": 0,
+          "logisticName": "USPS US to US",
+          "cjCode": 200,
+          "cjMessage": "Success"
+        }
+      ],
+      "bucket": "A",
+      "bucketReason": "US warehouse stock (50 units) + US→US route (USPS US to US, $0.00) — fix ships_from_country to US"
+    }
+  ]
+}

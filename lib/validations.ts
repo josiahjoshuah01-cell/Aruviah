@@ -70,6 +70,7 @@ export const shippingSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   address: z.string().min(5, "Address is required"),
   city: z.string().min(2, "City is required"),
+  zip: z.string().min(2, "Zip/postal code is required"),
   country: z.string().min(2, "Country is required"),
   phone: z.string().min(7, "Phone number is required"),
 });
@@ -80,6 +81,21 @@ export const cartItemInputSchema = z.object({
   variantId: z.string().uuid(),
   qty: z.number().int().positive(),
 });
+
+export type CartItemInput = z.infer<typeof cartItemInputSchema>;
+
+export const shippingDestinationSchema = z.object({
+  country: z.string().min(2, "Country is required"),
+  city: z.string().min(2, "City is required"),
+  zip: z.string().min(2, "Zip/postal code is required"),
+});
+
+export const calculateShippingSchema = z
+  .object({
+    items: z.array(cartItemInputSchema).min(1),
+    destination: shippingDestinationSchema,
+  })
+  .strict();
 
 export const createOrderSchema = z
   .object({
@@ -95,8 +111,6 @@ export const captureOrderSchema = z
     shipping: shippingSchema,
   })
   .strict();
-
-export type CartItemInput = z.infer<typeof cartItemInputSchema>;
 
 /** Reject client-sent price fields before schema parse. */
 export function rejectsClientPricing(body: Record<string, unknown>): boolean {

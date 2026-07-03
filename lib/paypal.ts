@@ -60,7 +60,7 @@ export async function createPayPalOrder(
 export async function capturePayPalOrder(
   accessToken: string,
   orderId: string
-): Promise<{ status: string; id: string }> {
+): Promise<{ status: string; id: string; amountUsd: number }> {
   const res = await fetch(
     `${PAYPAL_API_BASE}/v2/checkout/orders/${orderId}/capture`,
     {
@@ -78,7 +78,28 @@ export async function capturePayPalOrder(
   }
 
   const data = await res.json();
-  return { status: data.status, id: data.id };
+  const rawAmount =
+    data?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value ??
+    data?.purchase_units?.[0]?.amount?.value;
+  const amountUsd =
+    rawAmount != null ? parseFloat(String(rawAmount)) : Number.NaN;
+
+  return { status: data.status, id: data.id, amountUsd };
+}
+
+export async function getPayPalOrderAmount(
+  accessToken: string,
+  orderId: string
+): Promise<number | null> {
+  const res = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${orderId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  const value = data?.purchase_units?.[0]?.amount?.value;
+  return value != null ? parseFloat(String(value)) : null;
 }
 
 export async function verifyPayPalWebhook(

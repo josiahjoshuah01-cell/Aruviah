@@ -33,9 +33,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const resolved = await resolveCartItems(parsed.data.items);
+    const resolved = await resolveCartItems(
+      parsed.data.items,
+      parsed.data.shippingCountry
+    );
     if ("error" in resolved) {
-      return NextResponse.json({ error: resolved.error }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: resolved.error,
+          unshippableItems: resolved.unshippableItems,
+        },
+        { status: 400 }
+      );
     }
 
     const accessToken = await getPayPalAccessToken();
@@ -49,6 +58,11 @@ export async function POST(request: Request) {
       userId: user.id,
       items: parsed.data.items,
       shippingCountry: parsed.data.shippingCountry,
+      quote: {
+        subtotal: resolved.subtotal,
+        shippingTotal: resolved.shippingTotal,
+        total: resolved.total,
+      },
     });
 
     return NextResponse.json({ id: paypalOrderId });
