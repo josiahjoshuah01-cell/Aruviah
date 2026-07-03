@@ -23,8 +23,8 @@ export default async function AdminFulfillmentPage() {
       <div>
         <h1 className="font-display text-2xl font-bold">Fulfillment queue</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Orders CJ could not auto-fulfill — unmapped SKUs or API errors. CJ
-          wallet payment is tracked separately below.
+          Orders CJ could not auto-fulfill — unmapped SKUs, CJ order interception,
+          or API errors. CJ wallet payment is tracked separately below.
         </p>
       </div>
       <CjUnpaidOrdersPanel orders={cjUnpaid} />

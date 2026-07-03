@@ -13,10 +13,13 @@ import { Label } from "@/components/ui/label";
 import { markManuallyFulfilledAction } from "@/app/admin/orders/actions";
 import {
   inferFulfillmentStuckReason,
+  getFulfillmentStuckKind,
   type AdminOrderDetail,
 } from "@/lib/admin-queries";
+import { formatCjInterceptReasons } from "@/lib/cj-intercept-display";
 import { formatPrice } from "@/lib/utils";
 import { formatVariantLabel } from "@/lib/variant-utils";
+import { cn } from "@/lib/utils";
 
 function FulfillmentCard({ order }: { order: AdminOrderDetail }) {
   const router = useRouter();
@@ -24,6 +27,11 @@ function FulfillmentCard({ order }: { order: AdminOrderDetail }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const reason = inferFulfillmentStuckReason(order);
+  const stuckKind = getFulfillmentStuckKind(order);
+  const interceptLines =
+    stuckKind === "cj_intercept" && order.cj_intercept_reasons
+      ? formatCjInterceptReasons(order.cj_intercept_reasons)
+      : [];
 
   function handleFulfill() {
     startTransition(async () => {
@@ -56,9 +64,43 @@ function FulfillmentCard({ order }: { order: AdminOrderDetail }) {
         <OrderStatusBadge status={order.status} />
       </div>
 
-      <div className="mt-4 rounded-md border border-coral-pulse/25 bg-coral-pulse/5 px-3 py-2 text-sm">
-        <p className="font-medium text-coral-pulse">Why it&apos;s stuck</p>
-        <p className="mt-1 text-muted-foreground">{reason}</p>
+      <div
+        className={cn(
+          "mt-4 rounded-md border px-3 py-2 text-sm",
+          stuckKind === "cj_intercept"
+            ? "border-amber-500/30 bg-amber-500/5"
+            : stuckKind === "unmapped_sku"
+              ? "border-coral-pulse/25 bg-coral-pulse/5"
+              : "border-coral-pulse/25 bg-coral-pulse/5"
+        )}
+      >
+        <p
+          className={cn(
+            "font-medium",
+            stuckKind === "cj_intercept"
+              ? "text-amber-700 dark:text-amber-400"
+              : "text-coral-pulse"
+          )}
+        >
+          {stuckKind === "cj_intercept"
+            ? "CJ intercepted order"
+            : stuckKind === "unmapped_sku"
+              ? "Unmapped SKU — no CJ variant mapping"
+              : stuckKind === "live_stock"
+                ? "Live stock mismatch at checkout"
+                : stuckKind === "api_error"
+                  ? "CJ API error"
+                  : "Why it's stuck"}
+        </p>
+        {stuckKind === "cj_intercept" ? (
+          <ul className="mt-2 list-disc space-y-1 pl-4 text-muted-foreground">
+            {interceptLines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-1 text-muted-foreground">{reason}</p>
+        )}
       </div>
 
       <div className="mt-4">

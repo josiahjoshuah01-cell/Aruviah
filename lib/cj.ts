@@ -74,7 +74,12 @@ export type CJOrderResult =
     }
   | { success: false; error: string }
   | { skipped: true; reason: "unmapped_sku"; unmappedSkus: string[] }
-  | { skipped: true; reason: "no_credentials" };
+  | { skipped: true; reason: "no_credentials" }
+  | {
+      intercepted: true;
+      reasons: unknown[];
+      cjOrderId: string | null;
+    };
 
 type CJTokenCache = {
   accessToken: string;
@@ -106,7 +111,13 @@ type CJCreateOrderData = {
   payId?: string;
   orderAmount?: string | number;
   actualPayment?: string | number;
+  interceptOrderReasons?: unknown;
 };
+
+function normalizeInterceptReasons(raw: unknown): unknown[] {
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  return raw;
+}
 
 export type CjOrderDetailData = {
   orderId?: string;
@@ -637,6 +648,33 @@ export async function createCJOrder(order: CJOrderInput): Promise<CJOrderResult>
     });
 
     const body = (await res.json()) as CJApiEnvelope<CJCreateOrderData>;
+    const interceptReasons = normalizeInterceptReasons(
+      body.data?.interceptOrderReasons
+    );
+
+    if (interceptReasons.length > 0) {
+      const cjOrderId =
+        body.data?.orderId?.trim() ||
+        body.data?.orderNumber?.trim() ||
+        null;
+      console.warn(
+        "[CJ] createOrderV2 intercepted — order must not be treated as fulfilled:",
+        JSON.stringify({
+          aruviahOrderId: order.orderId,
+          cjOrderId,
+          httpStatus: res.status,
+          code: body.code,
+          message: body.message,
+          requestId: body.requestId,
+          interceptOrderReasons: interceptReasons,
+        })
+      );
+      return {
+        intercepted: true,
+        reasons: interceptReasons,
+        cjOrderId,
+      };
+    }
 
     if (!res.ok || body.code !== 200 || !body.result) {
       console.error(

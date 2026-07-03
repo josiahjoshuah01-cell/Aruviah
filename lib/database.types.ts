@@ -40,6 +40,7 @@ export type Database = {
       }
       order_items: {
         Row: {
+          cost_price_usd: number | null
           id: string
           order_id: string
           price: number
@@ -47,6 +48,7 @@ export type Database = {
           variant_id: string
         }
         Insert: {
+          cost_price_usd?: number | null
           id?: string
           order_id: string
           price: number
@@ -54,6 +56,7 @@ export type Database = {
           variant_id: string
         }
         Update: {
+          cost_price_usd?: number | null
           id?: string
           order_id?: string
           price?: number
@@ -144,6 +147,7 @@ export type Database = {
         Row: {
           cj_variant_id: string | null
           color: string | null
+          cost_price_usd: number | null
           created_at: string | null
           id: string
           image_url: string | null
@@ -158,6 +162,7 @@ export type Database = {
         Insert: {
           cj_variant_id?: string | null
           color?: string | null
+          cost_price_usd?: number | null
           created_at?: string | null
           id?: string
           image_url?: string | null
@@ -172,6 +177,7 @@ export type Database = {
         Update: {
           cj_variant_id?: string | null
           color?: string | null
+          cost_price_usd?: number | null
           created_at?: string | null
           id?: string
           image_url?: string | null

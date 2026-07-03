@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import {
   deleteProductAction,
   deleteVariantAction,
+  refreshAllActiveCjStockAction,
+  refreshProductStockAction,
   setProductActiveAction,
   setVariantActiveAction,
 } from "@/app/admin/products/actions";
@@ -132,11 +134,51 @@ function VariantRow({
   );
 }
 
+function formatStockRefreshToast(
+  results: Array<{
+    sku: string;
+    before: number;
+    after: number;
+    updated: boolean;
+    error?: string;
+  }>
+): string {
+  const changed = results.filter((r) => r.updated);
+  if (changed.length === 0) {
+    const first = results[0];
+    if (first && !first.error) {
+      return `${first.sku}: ${first.before} → ${first.after} (already in sync)`;
+    }
+    return "Stock already matches CJ";
+  }
+  if (changed.length === 1) {
+    const r = changed[0];
+    return `${r.sku}: ${r.before} → ${r.after}`;
+  }
+  return `Updated ${changed.length} variant(s) from CJ`;
+}
+
 function ProductRow({ product }: { product: AdminProductRow }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  function handleRefreshStock() {
+    startTransition(async () => {
+      const result = await refreshProductStockAction(product.id);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      const errors = result.results.filter((r) => r.error);
+      if (errors.length > 0) {
+        toast.error(errors.map((r) => `${r.sku}: ${r.error}`).join("; "));
+      }
+      toast.success(formatStockRefreshToast(result.results));
+      router.refresh();
+    });
+  }
 
   function handleDelete() {
     startTransition(async () => {
@@ -209,6 +251,17 @@ function ProductRow({ product }: { product: AdminProductRow }) {
             />
           ) : (
             <div className="flex flex-col gap-1">
+              {product.has_cj_mapping && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  onClick={handleRefreshStock}
+                  disabled={pending}
+                >
+                  {pending ? "Refreshing…" : "Refresh stock from CJ"}
+                </Button>
+              )}
               {product.can_hard_delete ? (
                 <Button
                   size="sm"
@@ -248,6 +301,28 @@ function ProductRow({ product }: { product: AdminProductRow }) {
 }
 
 export function AdminProductsTable({ products }: { products: AdminProductRow[] }) {
+  const router = useRouter();
+  const [bulkPending, startBulkTransition] = useTransition();
+  const cjProductCount = products.filter((p) => p.has_cj_mapping && p.is_active)
+    .length;
+
+  function handleRefreshAll() {
+    startBulkTransition(async () => {
+      const result = await refreshAllActiveCjStockAction();
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      const changed = result.results.filter((r) => r.updated);
+      toast.success(
+        changed.length > 0
+          ? `Refreshed ${changed.length} variant(s) across ${result.productCount} active CJ product(s)`
+          : `Checked ${result.results.length} variant(s) — all already in sync with CJ`
+      );
+      router.refresh();
+    });
+  }
+
   if (products.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
@@ -257,7 +332,25 @@ export function AdminProductsTable({ products }: { products: AdminProductRow[] }
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
+    <div className="space-y-4">
+      {cjProductCount > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            Sync local stock with CJ live inventory ({cjProductCount} active CJ
+            product{cjProductCount === 1 ? "" : "s"}).
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshAll}
+            disabled={bulkPending}
+          >
+            {bulkPending ? "Refreshing all…" : "Refresh all active CJ products"}
+          </Button>
+        </div>
+      )}
+      <div className="overflow-x-auto rounded-lg border border-border">
       <table className="w-full min-w-[900px] text-left text-sm">
         <thead className="border-b border-border bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
@@ -275,6 +368,7 @@ export function AdminProductsTable({ products }: { products: AdminProductRow[] }
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

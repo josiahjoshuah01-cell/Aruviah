@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getAdminNavBadges } from "@/lib/admin-queries";
+import { getAdminNavBadges, getAdminOverviewStats } from "@/lib/admin-queries";
+import { formatPrice } from "@/lib/utils";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,16 +8,64 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminOverviewPage() {
-  const badges = await getAdminNavBadges();
+  const [badges, stats] = await Promise.all([
+    getAdminNavBadges(),
+    getAdminOverviewStats(),
+  ]);
+
+  const excludedFootnote =
+    stats.lineItemUnitsWithoutCost > 0
+      ? `${stats.lineItemUnitsWithoutCost} unit(s) across ${stats.lineItemsWithoutCost} line item(s) excluded — no cost on file (e.g. original placeholder catalog).`
+      : "All paid line items include cost data.";
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold">Overview</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Admin dashboard — more metrics coming in the next phase.
+          Store performance across paid orders.
         </p>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <p className="text-sm text-muted-foreground">Paid orders</p>
+          <p className="mt-1 font-display text-3xl font-bold tabular-nums">
+            {stats.paidOrderCount}
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <p className="text-sm text-muted-foreground">Revenue</p>
+          <p className="mt-1 font-display text-3xl font-bold tabular-price">
+            {formatPrice(stats.revenueUsd)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Order totals (paid+ statuses)
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <p className="text-sm text-muted-foreground">Gross profit</p>
+          <p className="mt-1 font-display text-3xl font-bold tabular-price text-stream">
+            {formatPrice(stats.grossProfitUsd)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {stats.lineItemUnitsWithCost} unit(s) with cost on file
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <p className="text-sm text-muted-foreground">Profit margin</p>
+          <p className="mt-1 font-display text-3xl font-bold tabular-nums">
+            {stats.profitMarginPct != null
+              ? `${stats.profitMarginPct.toFixed(1)}%`
+              : "—"}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            On line items with recorded cost only
+          </p>
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground">{excludedFootnote}</p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link

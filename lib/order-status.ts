@@ -26,6 +26,15 @@ export const FULFILLMENT_QUEUE_STATUSES: OrderStatus[] = [
   "paid_fulfillment_pending",
 ];
 
+/** Orders that represent captured payment (revenue / profit metrics). */
+export const PAID_PLUS_ORDER_STATUSES: OrderStatus[] = [
+  "paid",
+  "paid_needs_manual_fulfillment",
+  "paid_fulfillment_pending",
+  "fulfilling",
+  "shipped",
+];
+
 export function orderStatusLabel(status: string): string {
   return status.replace(/_/g, " ");
 }

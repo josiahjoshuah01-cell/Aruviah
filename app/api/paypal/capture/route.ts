@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import {
   fulfillOrder,
   getExistingOrderByPaypalId,
+  resolveCartItems,
   updatePendingShipping,
 } from "@/lib/orders";
+import { verifyCjLiveStockAtCheckout } from "@/lib/cj-stock";
 import { capturePayPalOrder, getPayPalAccessToken } from "@/lib/paypal";
 import { captureOrderSchema, rejectsClientPricing } from "@/lib/validations";
 import { createClient } from "@/lib/supabase/server";
@@ -49,6 +51,22 @@ export async function POST(request: Request) {
     }
 
     await updatePendingShipping(paypalOrderId, shipping);
+
+    const resolved = await resolveCartItems(items);
+    if ("error" in resolved) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 });
+    }
+
+    const liveStock = await verifyCjLiveStockAtCheckout(
+      resolved.items.map((i) => ({
+        variantId: i.variantId,
+        qty: i.qty,
+        title: i.title,
+      }))
+    );
+    if (!liveStock.ok) {
+      return NextResponse.json({ error: liveStock.error }, { status: 400 });
+    }
 
     const accessToken = await getPayPalAccessToken();
     const capture = await capturePayPalOrder(accessToken, paypalOrderId);

@@ -5,6 +5,8 @@ import { assertAdminUser } from "@/lib/admin-auth";
 import {
   hardDeleteProduct,
   hardDeleteVariant,
+  refreshAllActiveCjStock,
+  refreshProductCjStock,
   setProductActive,
   setVariantActive,
 } from "@/lib/admin-products";
@@ -62,4 +64,66 @@ export async function setVariantActiveAction(
   const result = await setVariantActive(variantId, isActive);
   if (result.ok) revalidateProductPaths();
   return result;
+}
+
+export async function refreshProductStockAction(
+  productId: string
+): Promise<
+  | {
+      ok: true;
+      results: Array<{
+        sku: string;
+        before: number;
+        after: number;
+        updated: boolean;
+        error?: string;
+      }>;
+    }
+  | { ok: false; error: string }
+> {
+  await assertAdminUser();
+  const result = await refreshProductCjStock(productId);
+  if (!result.ok) return result;
+  revalidateProductPaths();
+  return {
+    ok: true,
+    results: result.results.map((r) => ({
+      sku: r.sku,
+      before: r.before,
+      after: r.after,
+      updated: r.updated,
+      error: r.error,
+    })),
+  };
+}
+
+export async function refreshAllActiveCjStockAction(): Promise<
+  | {
+      ok: true;
+      productCount: number;
+      results: Array<{
+        sku: string;
+        before: number;
+        after: number;
+        updated: boolean;
+        error?: string;
+      }>;
+    }
+  | { ok: false; error: string }
+> {
+  await assertAdminUser();
+  const result = await refreshAllActiveCjStock();
+  if (!result.ok) return result;
+  revalidateProductPaths();
+  return {
+    ok: true,
+    productCount: result.productCount,
+    results: result.results.map((r) => ({
+      sku: r.sku,
+      before: r.before,
+      after: r.after,
+      updated: r.updated,
+      error: r.error,
+    })),
+  };
 }

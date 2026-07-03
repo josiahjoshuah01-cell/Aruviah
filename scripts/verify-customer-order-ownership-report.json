@@ -1,0 +1,44 @@
+{
+  "capturedAt": "2026-07-02T23:05:57.050Z",
+  "project": "jlbrfsnvzmzcrfaigseb",
+  "seed": {
+    "userAId": "8af66b02-d0ae-4987-a337-501a585b93af",
+    "userBId": "5a58602e-cb1b-4d01-9272-8b95d7608e9d",
+    "orderAId": "1653eb4c-8e11-472f-8a45-971f7f311c0a",
+    "orderBId": "569074f8-336f-47d3-a5d6-58531cc4f4c9",
+    "productTitle": "USB C Charger Block, Charger Block 24W PD Power Adapter"
+  },
+  "results": [
+    {
+      "step": "2 — User A /account/orders list",
+      "pass": true,
+      "status": 200,
+      "rendered": "  Page: “Your orders” heading, subtitle about tracking\n  Visible card: product “USB C Charger Block, Charger Block 24W PD Power Adapter” with status badge (In transit/Shipped)\n  Order total shown with tabular price\n  User B order id prefix (569074f8): not visible\n  Each row links to /account/orders/{id}",
+      "notes": "User B order not in list"
+    },
+    {
+      "step": "3 — User A → User B order detail",
+      "pass": true,
+      "status": 404,
+      "rendered": "  HTTP 404 — “Order not found” heading\n  “This order doesn't exist or isn't linked to your account.”\n  “View your orders” link back to list\n  No line items, tracking number, or shipping address from another user",
+      "notes": "No User B data leaked"
+    },
+    {
+      "step": "4 — User A → random UUID",
+      "pass": true,
+      "status": 404,
+      "rendered": "  HTTP 404 — “Order not found” heading\n  “This order doesn't exist or isn't linked to your account.”\n  “View your orders” link back to list\n  No line items, tracking number, or shipping address from another user",
+      "notes": "Identical response body to step 3"
+    },
+    {
+      "step": "5 — User A own order detail (UI)",
+      "pass": true,
+      "status": 200,
+      "rendered": "  Header: “Order details” + formatted order date\n  Status badge: “In transit” (from cj_tracking_status)\n  Timeline: Order placed ✓ → Processing ✓ → Shipped (active, teal/current) → Delivered\n  Tracking card: “Package tracking”, status “In transit”, carrier USPS\n  Track number: CJPTEST0000000001YQ (mono)\n  “Track package” button → CJPacket fallback URL\n  Line item: “USB C Charger Block, Charger Block 24W PD Power Adapter” with variant color/size if set, qty 1\n  Shipping address: Test Buyer, 123 Seed Street, Austin, US\n  Summary: Subtotal + Shipping + Total (tabular-price)"
+    }
+  ],
+  "rls": {
+    "ownOrder": true,
+    "otherOrder": false
+  }
+}

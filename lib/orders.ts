@@ -1,5 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/admin";
 import { createCJOrder, type CJOrderResult } from "@/lib/cj";
+import { verifyCjLiveStockAtCheckout } from "@/lib/cj-stock";
 import { parseCjOrderAmountUsd, tryAutoPayCjOrder } from "@/lib/cj-payment";
 import type { CartItemInput, ShippingAddress } from "@/lib/validations";
 
@@ -9,6 +10,7 @@ export type ResolvedCartItem = {
   qty: number;
   price: number;
   shippingCost: number;
+  costPrice: number | null;
   sku: string;
   title: string;
   stock: number;
@@ -35,7 +37,7 @@ export async function resolveCartItems(
   const { data: variants, error } = await supabase
     .from("product_variants")
     .select(
-      "id, product_id, price_usd, shipping_cost_usd, stock, sku, is_active, product:products(id, title, is_active)"
+      "id, product_id, price_usd, shipping_cost_usd, cost_price_usd, stock, sku, is_active, product:products(id, title, is_active)"
     )
     .in("id", variantIds);
 
@@ -62,6 +64,8 @@ export async function resolveCartItems(
 
     const price = Number(variant.price_usd);
     const shippingCost = Number(variant.shipping_cost_usd);
+    const costPrice =
+      variant.cost_price_usd != null ? Number(variant.cost_price_usd) : null;
     total += (price + shippingCost) * item.qty;
 
     resolved.push({
@@ -70,6 +74,7 @@ export async function resolveCartItems(
       qty: item.qty,
       price,
       shippingCost,
+      costPrice,
       sku: variant.sku,
       title: product.title,
       stock: variant.stock,
@@ -167,6 +172,25 @@ export async function applyCJFulfillmentResult(
       .update({
         status: "paid_needs_manual_fulfillment",
         fulfillment_note: note,
+        cj_intercept_reasons: null,
+        cj_payment_status: "not_required",
+      })
+      .eq("id", orderId);
+    return;
+  }
+
+  if ("intercepted" in cjResult) {
+    console.warn(
+      `[CJ] Order ${orderId} intercepted by CJ — stored raw reasons:`,
+      JSON.stringify(cjResult.reasons)
+    );
+    await supabase
+      .from("orders")
+      .update({
+        status: "paid_needs_manual_fulfillment",
+        cj_intercept_reasons: cjResult.reasons,
+        fulfillment_note: null,
+        cj_order_id: cjResult.cjOrderId,
         cj_payment_status: "not_required",
       })
       .eq("id", orderId);
@@ -234,6 +258,7 @@ export async function fulfillOrder(params: {
     variant_id: item.variantId,
     qty: item.qty,
     price: item.price,
+    cost_price_usd: item.costPrice,
   }));
 
   const { data: orderId, error: rpcError } = await supabase.rpc(
@@ -257,6 +282,30 @@ export async function fulfillOrder(params: {
   const { data: authUser } = await supabase.auth.admin.getUserById(
     params.userId
   );
+
+  const liveStock = await verifyCjLiveStockAtCheckout(
+    items.map((i) => ({
+      variantId: i.variantId,
+      qty: i.qty,
+      title: i.title,
+    }))
+  );
+  if (!liveStock.ok) {
+    console.warn(
+      `[fulfillOrder] CJ live stock insufficient after payment for order ${orderId}:`,
+      liveStock.error
+    );
+    await supabase
+      .from("orders")
+      .update({
+        status: "paid_needs_manual_fulfillment",
+        fulfillment_note: `CJ live stock check failed: ${liveStock.error}`,
+        cj_payment_status: "not_required",
+      })
+      .eq("id", orderId);
+    await deletePendingCheckout(params.paypalOrderId);
+    return { orderId: orderId as string };
+  }
 
   const cjResult = await createCJOrder({
     orderId: orderId as string,

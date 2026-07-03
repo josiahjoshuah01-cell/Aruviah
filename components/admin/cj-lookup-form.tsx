@@ -49,7 +49,7 @@ export function CjLookupForm({ categories }: { categories: Category[] }) {
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
           Use this when you already found a specific product on CJ and know its
-          ID or SKU. Use search above to browse by keyword instead.
+          product ID, product SKU, or variant SKU (the code shown on the variant row).
         </p>
       </div>
 
@@ -58,7 +58,7 @@ export function CjLookupForm({ categories }: { categories: Category[] }) {
           <Label htmlFor="cj-lookup-id">CJ product ID or SKU</Label>
           <Input
             id="cj-lookup-id"
-            placeholder="e.g. 000B9312-… or CJLJ171263533GT"
+            placeholder="e.g. 2511060704591611100 or CJYD258310312LO"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             disabled={disabled}

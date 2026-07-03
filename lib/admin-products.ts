@@ -1,4 +1,8 @@
 import { createServiceClient } from "@/lib/supabase/admin";
+import {
+  refreshLiveCjStock,
+  type CjStockRefreshResult,
+} from "@/lib/cj-stock";
 
 export type AdminProductVariantRow = {
   id: string;
@@ -7,6 +11,7 @@ export type AdminProductVariantRow = {
   size: string | null;
   price_usd: number;
   stock: number;
+  cj_variant_id: string | null;
   is_active: boolean;
   can_hard_delete: boolean;
 };
@@ -20,6 +25,7 @@ export type AdminProductRow = {
   sold_count: number;
   is_active: boolean;
   can_hard_delete: boolean;
+  has_cj_mapping: boolean;
   variants: AdminProductVariantRow[];
 };
 
@@ -57,6 +63,7 @@ export async function listAdminProducts(): Promise<AdminProductRow[]> {
           size,
           price_usd,
           stock,
+          cj_variant_id,
           is_active
         )
       `
@@ -84,12 +91,14 @@ export async function listAdminProducts(): Promise<AdminProductRow[]> {
       size: v.size,
       price_usd: Number(v.price_usd),
       stock: v.stock,
+      cj_variant_id: v.cj_variant_id,
       is_active: v.is_active,
       can_hard_delete: !withOrders.has(v.id),
     }));
 
     const can_hard_delete =
       variants.length > 0 && variants.every((v) => v.can_hard_delete);
+    const has_cj_mapping = variants.some((v) => !!v.cj_variant_id);
 
     return {
       id: p.id,
@@ -102,6 +111,7 @@ export async function listAdminProducts(): Promise<AdminProductRow[]> {
       sold_count: p.sold_count,
       is_active: p.is_active,
       can_hard_delete,
+      has_cj_mapping,
       variants,
     };
   });
@@ -213,4 +223,66 @@ export async function setVariantActive(
 
   if (error) return { ok: false, error: error.message };
   return { ok: true };
+}
+
+export async function refreshProductCjStock(
+  productId: string
+): Promise<
+  | { ok: true; results: CjStockRefreshResult[] }
+  | { ok: false; error: string }
+> {
+  const supabase = createServiceClient();
+  const { data: variants, error } = await supabase
+    .from("product_variants")
+    .select("id, sku, cj_variant_id")
+    .eq("product_id", productId)
+    .not("cj_variant_id", "is", null);
+
+  if (error) return { ok: false, error: error.message };
+  if (!variants?.length) {
+    return { ok: false, error: "No CJ-mapped variants on this product" };
+  }
+
+  const results = await refreshLiveCjStock(
+    variants.map((v) => ({
+      id: v.id,
+      cj_variant_id: v.cj_variant_id as string,
+      sku: v.sku,
+    }))
+  );
+  return { ok: true, results };
+}
+
+export async function refreshAllActiveCjStock(): Promise<
+  | { ok: true; results: CjStockRefreshResult[]; productCount: number }
+  | { ok: false; error: string }
+> {
+  const supabase = createServiceClient();
+  const { data: variants, error } = await supabase
+    .from("product_variants")
+    .select("id, sku, cj_variant_id, product_id, product:products!inner(is_active)")
+    .not("cj_variant_id", "is", null)
+    .eq("is_active", true)
+    .eq("product.is_active", true);
+
+  if (error) return { ok: false, error: error.message };
+  if (!variants?.length) {
+    return { ok: true, results: [], productCount: 0 };
+  }
+
+  const productIds = new Set(variants.map((v) => v.product_id));
+
+  const results = await refreshLiveCjStock(
+    variants.map((v) => ({
+      id: v.id,
+      cj_variant_id: v.cj_variant_id as string,
+      sku: v.sku,
+    }))
+  );
+
+  return {
+    ok: true,
+    results,
+    productCount: productIds.size,
+  };
 }

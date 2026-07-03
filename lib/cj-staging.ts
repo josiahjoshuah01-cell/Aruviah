@@ -21,6 +21,17 @@ import {
 } from "@/lib/cj-verified-warehouse";
 import type { StagedVariantJson } from "@/lib/staging-types";
 const CJ_API_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
+/** CJ documents 1 req/s on many GET endpoints — shared across query/list calls. */
+const CJ_QUERY_MIN_INTERVAL_MS = 1100;
+
+let lastCjQueryAt = 0;
+
+async function waitForCjQuerySlot(): Promise<void> {
+  const now = Date.now();
+  const wait = CJ_QUERY_MIN_INTERVAL_MS - (now - lastCjQueryAt);
+  if (wait > 0) await sleep(wait);
+  lastCjQueryAt = Date.now();
+}
 export const CJ_MARKUP_MULTIPLIER = 2;
 const DEFAULT_STOCK = 50;
 
@@ -187,29 +198,81 @@ export async function queryCjProductDetail(
   param: CjQueryParam,
   value: string
 ): Promise<CJProductDetail | null> {
-  await sleep(300);
-  const queryUrl = `${CJ_API_BASE}/product/query?${param}=${encodeURIComponent(value)}&countryCode=US`;
-  const queryRes = await fetch(queryUrl, { headers });
-  const queryBody = (await queryRes.json()) as CJApiEnvelope<CJProductDetail>;
-  if (queryBody.code !== 200 || !queryBody.data?.pid) {
-    return null;
+  const countryFilters: Array<string | null> = ["US", null];
+
+  for (const countryCode of countryFilters) {
+    const queryUrl =
+      countryCode != null
+        ? `${CJ_API_BASE}/product/query?${param}=${encodeURIComponent(value)}&countryCode=${countryCode}`
+        : `${CJ_API_BASE}/product/query?${param}=${encodeURIComponent(value)}`;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await waitForCjQuerySlot();
+      const queryRes = await fetch(queryUrl, { headers });
+      const queryBody = (await queryRes.json()) as CJApiEnvelope<CJProductDetail> & {
+        code?: number;
+      };
+
+      const rateLimited =
+        queryRes.status === 429 || queryBody.code === 1600200;
+      if (rateLimited && attempt < 2) {
+        await sleep(CJ_QUERY_MIN_INTERVAL_MS);
+        continue;
+      }
+
+      if (queryBody.code !== 200 || !queryBody.data?.pid) {
+        break;
+      }
+
+      const detail = queryBody.data;
+      const hasVariants = (detail.variants?.length ?? 0) > 0;
+      if (hasVariants || countryCode === null) {
+        return detail;
+      }
+      // US filter can return pid with zero variants when stock is CN-only — retry unfiltered.
+      break;
+    }
   }
-  return queryBody.data;
+
+  return null;
 }
 
 export async function fetchCjVariantsByPid(
   headers: Record<string, string>,
   pid: string
 ): Promise<CJVariant[]> {
-  await sleep(200);
-  const url = `${CJ_API_BASE}/product/variant/query?pid=${encodeURIComponent(pid)}&countryCode=US`;
-  const body = (await fetch(url, { headers }).then((r) =>
-    r.json()
-  )) as CJApiEnvelope<CJVariant[]>;
-  if (body.code !== 200 || !Array.isArray(body.data)) {
-    return [];
+  const countryFilters: Array<string | null> = ["US", null];
+
+  for (const countryCode of countryFilters) {
+    const url =
+      countryCode != null
+        ? `${CJ_API_BASE}/product/variant/query?pid=${encodeURIComponent(pid)}&countryCode=${countryCode}`
+        : `${CJ_API_BASE}/product/variant/query?pid=${encodeURIComponent(pid)}`;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await waitForCjQuerySlot();
+      const res = await fetch(url, { headers });
+      const body = (await res.json()) as CJApiEnvelope<CJVariant[]> & {
+        code?: number;
+      };
+
+      const rateLimited = res.status === 429 || body.code === 1600200;
+      if (rateLimited && attempt < 2) {
+        await sleep(CJ_QUERY_MIN_INTERVAL_MS);
+        continue;
+      }
+
+      if (body.code !== 200 || !Array.isArray(body.data)) {
+        break;
+      }
+      if (body.data.length > 0 || countryCode === null) {
+        return body.data;
+      }
+      break;
+    }
   }
-  return body.data;
+
+  return [];
 }
 
 export async function enrichCjVariants(
@@ -220,7 +283,7 @@ export async function enrichCjVariants(
   const enrichedVariants: CJVariant[] = [];
   for (const v of seedVariants.slice(0, 24)) {
     if (!v.vid) continue;
-    await sleep(200);
+    await waitForCjQuerySlot();
     const vidUrl = `${CJ_API_BASE}/product/variant/queryByVid?vid=${encodeURIComponent(v.vid)}&features=enable_inventory`;
     const vidBody = (await fetch(vidUrl, { headers }).then((r) =>
       r.json()
@@ -230,7 +293,7 @@ export async function enrichCjVariants(
       merged = { ...v, ...vidBody.data };
     }
 
-    await sleep(150);
+    await waitForCjQuerySlot();
     const stockUrl = `${CJ_API_BASE}/product/stock/queryByVid?vid=${encodeURIComponent(v.vid)}`;
     const stockBody = (await fetch(stockUrl, { headers }).then((r) =>
       r.json()

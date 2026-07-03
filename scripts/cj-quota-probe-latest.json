@@ -1,0 +1,437 @@
+{
+  "capturedAt": "2026-07-02T22:21:22.301Z",
+  "setting": {
+    "code": 200,
+    "result": true,
+    "message": "Success",
+    "data": {
+      "openId": 41179,
+      "unionOpenId": null,
+      "userNum": "CJ5345288",
+      "openName": "Joshua Nyandieka",
+      "openEmail": "jo***a3@gmail.com",
+      "setting": {
+        "quotaLimits": [
+          {
+            "quotaUrl": "/authentication/getAccessToken",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/auth.html#_1-1-get-access-token-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/authentication/logout",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/auth.html#_1-3-logout-token-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/authentication/refreshAccessToken",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/auth.html#_1-2-refresh-access-token-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/disputes/cancel",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/dispute.html#_4-cancel-dispute-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/disputes/create",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/dispute.html#_3-create-dispute-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/disputes/disputeConfirmInfo",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/dispute.html#_2-confirm-the-dispute-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/disputes/disputeProducts",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/dispute.html#_1-select-the-list-of-disputed-products-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/disputes/getDisputeList",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/dispute.html#_5-query-the-list-of-disputes-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/logistic/freightCalculate",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/logistic.html#_1-1-freight-calculation-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/logistic/freightCalculateTip",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/api2/api/logistic.html#_1-2-freight-calculation-tip-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/logistic/getSupplierLogisticsTemplate",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/logistic/getTrackInfo",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/logistic.html#_2-1-get-tracking-information-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/logistic/partnerFreightCalculate",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/logistic/trackInfo",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/logistic.html#_2-2-get-tracking-information-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/platform/api/call",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/comments",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_4-1-inquiry-reviews-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/getCategory",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_1-1-category-list-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/list",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_1-2-product-list-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/listV2",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_1-2-product-list-v2-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/listed/getPlatformCategoryTree",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/listed/getReceiverCountryInfo",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/listed/listedByPids",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/listed/queryDeliveryProfiles",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/listed/queryVendors",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/productComments",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_4-2-inquiry-reviews-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/query",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_1-3-product-details-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/queryProductsByImage",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_8-1-query-products-by-image-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/sourcing/create",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_5-1-create-sourcing-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/sourcing/query",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_5-2-query-sourcing-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/stock/getInventoryByPid",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/stock/privateInventory/querySkuDetailListBySku",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/stock/privateInventory/querySkuDetailPage",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/stock/privateInventory/querySkuFlowByCondition",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/stock/privateInventory/querySkuListByProductId",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/stock/privateInventory/querySpuPage",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/stock/queryBySku",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/stock/queryByVid",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_3-1-inventory-inquiry-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/variant/query",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_2-1-inquiry-of-all-variants-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/product/variant/queryByVid",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/product.html#_2-2-variant-id-inquiry-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/setting/get",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/setting.html#_1-1-get-settings-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shop/getShops",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shopping/order/confirmOrder",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/shopping.html#_1-6-confirm-order-patch",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shopping/order/createOrderV2",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/shopping.html#_1-1-create-order-v2-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shopping/order/createOrderV3",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/shopping.html#_1-2-create-order-v3-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shopping/order/deleteOrder",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/shopping.html#_1-5-order-delete-del",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shopping/order/getOrderDetail",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/shopping.html#_1-4-query-order-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shopping/order/list",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/shopping.html#_1-3-list-order-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shopping/pay/getBalance",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/shopping.html#_2-1-get-balance-get",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/shopping/pay/payBalance",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/shopping.html#_2-2-pay-balance-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/storehouseCenterWeb/syncStorehouseVideoRequests",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/webhook/product/subscribe",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/webhook.html#_2-1-subscribe-products-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/webhook/product/subscribe/list",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/webhook/product/unsubscribe",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2/api/webhook.html#_2-2-unsubscribe-products-post",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          },
+          {
+            "quotaUrl": "/webhook/setting/list",
+            "docLink": "https://developers.cjdropshipping.cn/en/api/api2",
+            "quotaLimit": 1000,
+            "requestedNum": 0,
+            "quotaType": 0
+          }
+        ],
+        "qpsLimit": 100
+      },
+      "callback": {
+        "product": {
+          "type": "CANCEL",
+          "urls": []
+        },
+        "stock": {
+          "type": "CANCEL",
+          "urls": []
+        },
+        "order": {
+          "type": "CANCEL",
+          "urls": []
+        },
+        "logistic": {
+          "type": "CANCEL",
+          "urls": []
+        }
+      },
+      "root": "GENERAL",
+      "isSandbox": false
+    },
+    "requestId": "5504e88d37824f0aa52f2d15f2c845f7",
+    "pointsInfo": {
+      "total": 50000,
+      "usedToday": 220,
+      "remaining": 50000
+    },
+    "success": true
+  },
+  "queryEnvelope": {
+    "code": 200,
+    "result": true,
+    "message": "Success",
+    "requestId": "989e0d5de73945db81a538ac8aa9f670",
+    "success": true,
+    "pointsInfo": {
+      "total": 50000,
+      "usedToday": 230,
+      "remaining": 50000
+    }
+  }
+}

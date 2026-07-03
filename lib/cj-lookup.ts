@@ -52,7 +52,8 @@ export type CjLookupMethod =
   | "direct_pid"
   | "direct_productSku"
   | "direct_variantSku"
-  | "list_productSku_fallback";
+  | "list_productSku_fallback"
+  | "list_variantSku_fallback";
 
 export type CjLookupFetchResult = {
   product: FetchedCjProduct;
@@ -62,6 +63,7 @@ export type CjLookupFetchResult = {
 type CJListItem = {
   pid: string;
   productSku?: string;
+  variantSku?: string;
   productImage?: string;
   shippingCountryCodes?: string[];
 };
@@ -71,21 +73,48 @@ type CJApiEnvelope<T> = {
   data?: T;
 };
 
+const CJ_LIST_MIN_INTERVAL_MS = 1100;
+let lastCjListAt = 0;
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function waitForCjListSlot(): Promise<void> {
+  const now = Date.now();
+  const wait = CJ_LIST_MIN_INTERVAL_MS - (now - lastCjListAt);
+  if (wait > 0) await sleep(wait);
+  lastCjListAt = Date.now();
+}
+
+/**
+ * CJ product pages often show variant-level SKUs (e.g. CJYD258310312LO) while
+ * productSku is shorter (e.g. CJYD2583103). Long codes with a letter suffix are
+ * almost always variantSku.
+ */
+export function looksLikeVariantSku(sku: string): boolean {
+  const upper = sku.toUpperCase();
+  if (upper.length >= 14) return true;
+  return /^[A-Z]{2,5}\d{8,}[A-Z]{2,}$/.test(upper);
+}
+
 async function fetchFromListBySku(
   headers: Record<string, string>,
-  sku: string
+  sku: string,
+  param: "productSku" | "variantSku"
 ): Promise<{ pid: string; productImage?: string; shippingCountryCodes?: string[] } | null> {
-  const listUrl = `${CJ_API_BASE}/product/list?pageNum=1&pageSize=10&productSku=${encodeURIComponent(sku)}&countryCode=US`;
+  await waitForCjListSlot();
+  const listUrl = `${CJ_API_BASE}/product/list?pageNum=1&pageSize=10&${param}=${encodeURIComponent(sku)}&countryCode=US`;
   const listRes = await fetch(listUrl, { headers });
   const listBody = (await listRes.json()) as CJApiEnvelope<{ list: CJListItem[] }>;
   if (listBody.code !== 200 || !listBody.data?.list?.length) {
     return null;
   }
 
-  const exact =
-    listBody.data.list.find(
-      (item) => item.productSku?.toUpperCase() === sku.toUpperCase()
-    ) ?? listBody.data.list[0];
+  const exact = listBody.data.list.find((item) => {
+    const field = param === "productSku" ? item.productSku : item.variantSku;
+    return field?.toUpperCase() === sku.toUpperCase();
+  });
 
   if (!exact?.pid) return null;
   return {
@@ -134,30 +163,62 @@ export async function fetchCjProductForLookup(
   }
 
   const sku = classified.value;
+  const preferVariant = looksLikeVariantSku(sku);
+  const queryOrder: Array<["productSku" | "variantSku", CjLookupMethod]> =
+    preferVariant
+      ? [
+          ["variantSku", "direct_variantSku"],
+          ["productSku", "direct_productSku"],
+        ]
+      : [
+          ["productSku", "direct_productSku"],
+          ["variantSku", "direct_variantSku"],
+        ];
 
-  let product = await fetchByQueryParam(headers, "productSku", sku, null);
-  if (product) {
-    return { product, method: "direct_productSku" };
+  for (const [param, method] of queryOrder) {
+    const detail = await queryCjProductDetail(headers, param, sku);
+    if (!detail) continue;
+
+    const product = await buildFetchedCjProduct(headers, detail, null);
+    if (product) {
+      return { product, method };
+    }
+
+    // Query matched but variant enrichment failed — resolve full catalog by pid.
+    const byPid = await fetchByQueryParam(headers, "pid", detail.pid, null);
+    if (byPid) {
+      return {
+        product: byPid,
+        method: method === "direct_variantSku" ? "direct_variantSku" : "direct_productSku",
+      };
+    }
   }
 
-  product = await fetchByQueryParam(headers, "variantSku", sku, null);
-  if (product) {
-    return { product, method: "direct_variantSku" };
+  const listOrder: Array<["productSku" | "variantSku", CjLookupMethod]> =
+    preferVariant
+      ? [["productSku", "list_productSku_fallback"]]
+      : [
+          ["productSku", "list_productSku_fallback"],
+          ["variantSku", "list_variantSku_fallback"],
+        ];
+
+  for (const [param, method] of listOrder) {
+    const listHit = await fetchFromListBySku(headers, sku, param);
+    if (!listHit) continue;
+
+    const product = await fetchByQueryParam(
+      headers,
+      "pid",
+      listHit.pid,
+      listHit.shippingCountryCodes ?? null,
+      listHit.productImage
+    );
+    if (product) {
+      return { product, method };
+    }
   }
 
-  const listHit = await fetchFromListBySku(headers, sku);
-  if (!listHit) return null;
-
-  product = await fetchByQueryParam(
-    headers,
-    "pid",
-    listHit.pid,
-    listHit.shippingCountryCodes ?? null,
-    listHit.productImage
-  );
-  if (!product) return null;
-
-  return { product, method: "list_productSku_fallback" };
+  return null;
 }
 
 export type CjLookupSuccess = {
@@ -191,7 +252,7 @@ export async function stageCjLookup(
 
   if (!classifyCjIdentifier(trimmedId)) {
     throw new Error(
-      "Enter a CJ product ID (UUID or numeric) or a product SKU like CJLJ171263533GT."
+      "Enter a CJ product ID (UUID or numeric), product SKU (e.g. CJYP2957751), or variant SKU from the CJ product page (e.g. CJYD258310312LO)."
     );
   }
 

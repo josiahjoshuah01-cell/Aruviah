@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "status": "paid_needs_manual_fulfillment",
+  "cj_intercept_reasons": [
+    {
+      "code": "SIMULATED_INTERCEPT",
+      "message": "Simulated CJ stock block for test"
+    },
+    {
+      "desc": "Product removed from CJ catalog",
+      "reasonCode": "DELISTED"
+    }
+  ],
+  "fulfillment_note": null,
+  "cj_order_id": "CJ_SIMULATED_ORDER_ID",
+  "stuckKind": "cj_intercept",
+  "displayLines": [
+    "[SIMULATED_INTERCEPT] Simulated CJ stock block for test",
+    "[DELISTED] Product removed from CJ catalog"
+  ],
+  "inferReason": "[SIMULATED_INTERCEPT] Simulated CJ stock block for test · [DELISTED] Product removed from CJ catalog"
+}

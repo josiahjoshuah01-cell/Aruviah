@@ -1,0 +1,27 @@
+{
+  "steps": [
+    "Variant ARV-00138 (9cf3d79e…)",
+    "Local stock before: 194",
+    "CJ live stock (queryByVid): 194",
+    "refreshLiveCjStock: 193 → 194 (CJ=194)",
+    "PASS: stock refresh synced local to CJ",
+    "PASS: checkout allows qty=1 when CJ has stock",
+    "Simulated stale local stock: set local to 999 (CJ live remains 194)",
+    "PASS: stale local stock ignored — CJ live stock authorizes checkout",
+    "PASS: checkout blocked when qty > CJ stock: \"USB C Charger Block, Charger Block 24W PD Power Adapter\" just went out of stock — only 194 available",
+    "Restored local stock to 194"
+  ],
+  "stockRefresh": {
+    "variantId": "9cf3d79e-5e54-44b4-9e5f-7a3829bfc671",
+    "sku": "ARV-00138",
+    "before": 193,
+    "after": 194,
+    "cjStock": 194,
+    "updated": true
+  },
+  "checkoutBlock": {
+    "ok": false,
+    "error": "\"USB C Charger Block, Charger Block 24W PD Power Adapter\" just went out of stock — only 194 available"
+  },
+  "ok": true
+}

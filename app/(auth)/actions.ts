@@ -7,12 +7,22 @@ export type AuthState = {
   error?: string;
 };
 
+function safeRedirectPath(path: string | null | undefined): string {
+  if (path && path.startsWith("/") && !path.startsWith("//")) {
+    return path;
+  }
+  return "/";
+}
+
 export async function signIn(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const redirectTo = safeRedirectPath(
+    (formData.get("redirect") as string | null) ?? null
+  );
 
   if (!email || !password) {
     return { error: "Email and password are required" };
@@ -25,7 +35,7 @@ export async function signIn(
     return { error: error.message };
   }
 
-  redirect("/");
+  redirect(redirectTo);
 }
 
 export async function signUp(

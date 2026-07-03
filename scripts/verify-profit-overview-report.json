@@ -1,0 +1,18 @@
+{
+  "project": "jlbrfsnvzmzcrfaigseb",
+  "seededOrderId": "1b3abe0d-bfd6-4b24-8ae0-ff875fa2ed50",
+  "unitPrice": 31.24,
+  "unitCost": 15.62,
+  "expectedGrossProfitPerUnit": 15.62,
+  "overview": {
+    "paidOrderCount": 1,
+    "revenueUsd": 31.24,
+    "grossProfitUsd": 15.62,
+    "profitMarginPct": 50,
+    "lineItemsWithCost": 1,
+    "lineItemUnitsWithCost": 1,
+    "lineItemsWithoutCost": 0,
+    "lineItemUnitsWithoutCost": 0
+  },
+  "pass": true
+}

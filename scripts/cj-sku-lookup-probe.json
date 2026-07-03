@@ -1,0 +1,555 @@
+{
+  "sku": "CJYD258310312LO",
+  "classified": {
+    "kind": "productSku",
+    "value": "CJYD258310312LO"
+  },
+  "calls": [
+    {
+      "step": "GET product/query?productSku",
+      "httpStatus": 200,
+      "url": "https://developers.cjdropshipping.com/api2.0/v1/product/query?productSku=CJYD258310312LO&countryCode=US",
+      "body": {
+        "code": 1602001,
+        "result": false,
+        "message": "Product not found",
+        "data": null,
+        "requestId": "22d0f939472a4ef7898856be7c9a2533",
+        "pointsInfo": {
+          "total": 50000,
+          "usedToday": 590,
+          "remaining": 50000
+        },
+        "success": false
+      }
+    },
+    {
+      "step": "GET product/query?variantSku",
+      "httpStatus": 200,
+      "url": "https://developers.cjdropshipping.com/api2.0/v1/product/query?variantSku=CJYD258310312LO&countryCode=US",
+      "body": {
+        "code": 200,
+        "result": true,
+        "message": "Success",
+        "data": {
+          "pid": "2511060704591611100",
+          "productName": "[\"2025欧美跨境纽扣针织翻领毛衣开衫外套秋冬新款纯色休闲时尚女装\",\"2025欧美跨境纽扣针织\",\"翻领毛衣开衫外套秋\"]",
+          "productNameSet": [
+            "2025欧美跨境纽扣针织翻领毛衣开衫外套秋冬新款纯色休闲时尚女装",
+            "翻领毛衣开衫外套秋",
+            "2025欧美跨境纽扣针织"
+          ],
+          "productNameEn": "Casual Fashion Button Knitted Lapel Sweater For Women Long Sleeve Knitted Sweaters Tops Winter Jumper",
+          "productSku": "CJYD2583103",
+          "bigImage": "https://oss-cf.cjdropshipping.com/product/2025/12/02/08/03f6bd18-4c10-405d-b40d-d9a019462e2e.jpg",
+          "productImage": "[\"https://oss-cf.cjdropshipping.com/product/2025/12/02/08/03f6bd18-4c10-405d-b40d-d9a019462e2e.jpg\",\"https://oss-cf.cjdropshipping.com/product/2025/11/06/07/783de524-10c2-42ea-94dc-e5b95794bf62_fine.jpeg\",\"https://cf.cjdropshipping.com/quick/product/de1066c9-aee5-4a3d-b619-43f80682ce55.jpg\",\"https://cf.cjdropshipping.com/quick/product/4f162dca-c198-4f8a-bbae-fe6785c87850.jpg\",\"https://cf.cjdropshipping.com/quick/product/e5eb12a2-68bd-4ce5-9621-8aaa30889b43.jpg\",\"https://cf.cjdropshipping.com/quick/product/32038d7b-bc93-48af-87bf-b048162f5e9b.jpg\",\"https://cf.cjdropshipping.com/quick/product/e8c7331e-edc4-40ec-abea-890887a7e855.jpg\",\"https://oss-cf.cjdropshipping.com/product/2026/01/18/09/98497acc-1fc8-4f01-8421-9b9298441893.jpg\"]",
+          "productImageSet": [
+            "https://cf.cjdropshipping.com/quick/product/de1066c9-aee5-4a3d-b619-43f80682ce55.jpg",
+            "https://cf.cjdropshipping.com/quick/product/e8c7331e-edc4-40ec-abea-890887a7e855.jpg",
+            "https://cf.cjdropshipping.com/quick/product/e5eb12a2-68bd-4ce5-9621-8aaa30889b43.jpg",
+            "https://oss-cf.cjdropshipping.com/product/2025/11/06/07/783de524-10c2-42ea-94dc-e5b95794bf62_fine.jpeg",
+            "https://cf.cjdropshipping.com/quick/product/32038d7b-bc93-48af-87bf-b048162f5e9b.jpg",
+            "https://oss-cf.cjdropshipping.com/product/2025/12/02/08/03f6bd18-4c10-405d-b40d-d9a019462e2e.jpg",
+            "https://oss-cf.cjdropshipping.com/product/2026/01/18/09/98497acc-1fc8-4f01-8421-9b9298441893.jpg",
+            "https://cf.cjdropshipping.com/quick/product/4f162dca-c198-4f8a-bbae-fe6785c87850.jpg"
+          ],
+          "productWeight": "350.00-578.00",
+          "productUnit": null,
+          "productType": "ORDINARY_PRODUCT",
+          "categoryId": "DE9C662C-3F48-4855-87E7-E18733EFF6D2",
+          "categoryName": "Women's Clothing > Tops & Sets > Sweaters",
+          "entryCode": "6104330000",
+          "entryName": "涤纶女式上衣",
+          "entryNameEn": "Women's Polyester Tops",
+          "materialName": "[\"布料\"]",
+          "materialNameSet": [
+            "布料"
+          ],
+          "materialNameEn": "[\"Cloth\"]",
+          "materialNameEnSet": [
+            "Cloth"
+          ],
+          "materialKey": "[\"FABRIC\"]",
+          "materialKeySet": [
+            "FABRIC"
+          ],
+          "packingWeight": "370.00-590.00",
+          "packingName": "[\"塑料袋\"]",
+          "packingNameSet": [
+            "塑料袋"
+          ],
+          "packingNameEn": "[\"Plastic bags\"]",
+          "packingNameEnSet": [
+            "Plastic bags"
+          ],
+          "packingKey": "[\"PLASTIC_BAG\"]",
+          "packingKeySet": [
+            "PLASTIC_BAG"
+          ],
+          "productKey": "[\"颜色\",\"尺码\"]",
+          "productKeySet": [
+            "颜色",
+            "尺码"
+          ],
+          "productKeyEn": "Color-Size",
+          "productKeyEnSet": [
+            "Size",
+            "Color"
+          ],
+          "productPro": "[\"服装\"]",
+          "productProSet": [
+            "服装"
+          ],
+          "productProEn": "[\"Clothes\"]",
+          "productProEnSet": [
+            "Clothes"
+          ],
+          "sellPrice": "6.30-7.46",
+          "sourceFrom": 0,
+          "description": "<p><b>Overview:</b><br/>Unique design, stylish and beautiful.<br/>Good material, High quality.<br/>100% Brand New.<br/>A variety of colors, any choice.<br/>Comfortable to wear.</p><p><b><br/></b></p><p><b>Product information:</b><br/>Color: sky blue, dark blue, pink, wine red<br/> Size: S,M,L,XL,XXL,XXXL<br/> Version: Loose<br/> Style type: Japanese and Korean casual<br/> Popular elements: splicing<br/> Style: Cardigan model<br/> Fabric name: Polyester<br/> Sleeve type: conventional sleeve<br/></p><p>&nbsp; \n <length ≤=\"\" 65cm)<=\"\" p=\"\"><br/>\n  <b>Packing list: </b>\n  <br/> Sweater*1pcs\n  <br/>\n </length></p><p><length ≤=\"\" 65cm)<=\"\" p=\"\"><br/></length></p>\n<b>Product Image:</b><div style=\"text-align:center;\">\n<table border=\"0\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><th>Size</th><th>Length</th><th>Bust</th><th>Sleeve</th></tr><tr><td>S</td><td>65</td><td>108</td><td>59</td></tr><tr><td>M</td><td>66</td><td>113</td><td>60</td></tr><tr><td>L</td><td>67</td><td>118</td><td>61</td></tr><tr><td>XL</td><td>68</td><td>123</td><td>62</td></tr><tr><td>XXL</td><td>69</td><td>128</td><td>63</td></tr><tr><td>3XL</td><td>70</td><td>133</td><td>64</td></tr></tbody></table>\n<img src=\"https://cf.cjdropshipping.com/quick/product/954efef1-3532-4a60-bb20-e3494e3d585d.jpg\"/>\n<img src=\"https://cf.cjdropshipping.com/quick/product/4f162dca-c198-4f8a-bbae-fe6785c87850.jpg\"/>\n<img src=\"https://cf.cjdropshipping.com/quick/product/e5eb12a2-68bd-4ce5-9621-8aaa30889b43.jpg\"/>\n<img src=\"https://cf.cjdropshipping.com/quick/product/de1066c9-aee5-4a3d-b619-43f80682ce55.jpg\"/>\n<img src=\"https://oss-cf.cjdropshipping.com/product/2025/11/06/07/cf1959db-b7cb-4935-b0a2-2628cd70c2df.jpg\"/></div>",
+          "variants": [],
+          "addMarkStatus": 0,
+          "createrTime": "2025-11-06T07:04:59+08:00",
+          "productVideo": null,
+          "status": "3",
+          "suggestSellPrice": "32.32 - 70.01",
+          "listedNum": 435,
+          "supplierName": null,
+          "supplierId": null,
+          "customizationVersion": null,
+          "customizationJson1": null,
+          "customizationJson2": null,
+          "customizationJson3": null,
+          "customizationJson4": null,
+          "isTestProduct": false
+        },
+        "requestId": "fb8c9939160040d5bb372c42c7a7c38d",
+        "pointsInfo": {
+          "total": 50000,
+          "usedToday": 600,
+          "remaining": 50000
+        },
+        "success": true
+      }
+    },
+    {
+      "step": "GET product/list?productSku",
+      "httpStatus": 200,
+      "url": "https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=10&productSku=CJYD258310312LO&countryCode=US",
+      "body": {
+        "code": 200,
+        "result": true,
+        "message": "Success",
+        "data": {
+          "pageNum": 1,
+          "pageSize": 10,
+          "total": 0,
+          "list": []
+        },
+        "requestId": "6869eb46cb6440a79be118bd0e57ee4a",
+        "pointsInfo": {
+          "total": 50000,
+          "usedToday": 650,
+          "remaining": 50000
+        },
+        "success": true
+      }
+    },
+    {
+      "step": "GET product/list?variantSku",
+      "httpStatus": 200,
+      "url": "https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=10&variantSku=CJYD258310312LO&countryCode=US",
+      "body": {
+        "code": 200,
+        "result": true,
+        "message": "Success",
+        "data": {
+          "pageNum": 1,
+          "pageSize": 10,
+          "total": 59937,
+          "list": [
+            {
+              "pid": "2072563742376099842",
+              "productName": "[\"Swing Sets for Backyard\",\" Outdoor Porch\",\" Swing Frame\",\" Hammock Chair Stand Only\",\" \",\"Max Load 550Lbs A-Frame Swing Stand\",\"\",\" Swing Set for Patio\",\" Playground\",\" \",\"Park\",\" Swing not Include\"]",
+              "productNameEn": "Swing Sets For Backyard, Outdoor Porch Swing Frame, Hammock Chair Stand Only, Max Load 550Lbs A-Frame Swing Stand, Swing Set For Patio, Playground, Park, Swing Not Include",
+              "productSku": "CJYL2964170",
+              "productImage": "https://cf.cjdropshipping.com/ac62c9f0-a8b8-4d07-95ed-1dba47c72d4b.jpg",
+              "productWeight": "15700",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Garden Tools",
+              "listingCount": 0,
+              "sellPrice": "65.63",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "jiujiu2",
+              "supplierId": "1866737082005987328",
+              "categoryId": "CDB10A90-3D34-4396-99B2-919E7CAD4B53",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072561639153770498",
+              "productName": "[\"300W Portable Power Station\",\" \",\"296Wh 80000mAh Lithium Battery \",\"Generator Solar for Outdoor\",\" Camping RV Home\",\"Power Supply\"]",
+              "productNameEn": "300W Portable Power Station, 296Wh 80000mAh Lithium Battery Generator Solar For Outdoor Camping RV Home,Power Supply",
+              "productSku": "CJSJ2964156",
+              "productImage": "https://cf.cjdropshipping.com/39dfce59-0738-426e-82b1-09480ca8a861.jpg",
+              "productWeight": "4000",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Chargers",
+              "listingCount": 0,
+              "sellPrice": "114.89",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "jiujiu2",
+              "supplierId": "1866737082005987328",
+              "categoryId": "B200FABB-A76B-4750-9957-FEA3DCB21F1F",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072560114792701954",
+              "productName": "[\"Retractable \",\" Awning\",\"280gsm UV Resistant\"]",
+              "productNameEn": "8' X 6.5' Retractable Awning, 280gsm UV Resistant Sunshade Shelter For Deck, Balcony, Yard, Blue",
+              "productSku": "CJLY2964142",
+              "productImage": "https://cf.cjdropshipping.com/7900d7f3-e415-4402-9cc3-25c38c945d23.jpg",
+              "productWeight": "18340",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Camping & Hiking",
+              "listingCount": 0,
+              "sellPrice": "120.32",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "ShengX",
+              "supplierId": "1893233510400139264",
+              "categoryId": "EA851596-F20F-4AA5-8869-4BB5CA1968DC",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072565980848025601",
+              "productName": "[\"Metal Expandable Barricade\",\" 23FT Traffic Barricade\",\" with Casters\",\" Retractable Security Gate\",\" Portable\",\" Driveway Gate Outdoor Barricade Fence for\",\" Construction Area\",\" Traffic Control\",\" Garage(23FT)\"]",
+              "productNameEn": "Metal Expandable Barricade, 23FT Traffic Barricade With Casters, Retractable Security Gate, Portable Driveway Gate Outdoor Barricade Fence For Construction Area, Traffic Control, Garage 23FT",
+              "productSku": "CJYL2964186",
+              "productImage": "https://cf.cjdropshipping.com/1e9e0f60-6bbc-4b77-ba24-d76ae9c2c6ec.jpg",
+              "productWeight": "11000",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Garden Tools",
+              "listingCount": 0,
+              "sellPrice": "155.68",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "jiujiu2",
+              "supplierId": "1866737082005987328",
+              "categoryId": "CDB10A90-3D34-4396-99B2-919E7CAD4B53",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072504536305278978",
+              "productName": "[\"For\",\"2013-2015\",\"Malibu\"]",
+              "productNameEn": "For 2013-2015 Malibu Sedan Mugen Style Window Visors Rain Sun Guard Vent 4Pc Set",
+              "productSku": "CJQT2963679",
+              "productImage": "https://cf.cjdropshipping.com/d8b4add4-71ab-4f9e-95e7-1b584d9a9afb.jpg",
+              "productWeight": "1000",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Other Replacement Parts",
+              "listingCount": 0,
+              "sellPrice": "35.26",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "Mankee",
+              "supplierId": "1851164621483024384",
+              "categoryId": "CB255FA6-9B4C-4542-82CC-F774DE8F8C68",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072504260859359233",
+              "productName": "[\"Fits\",\"02-10\",\"Ford\"]",
+              "productNameEn": "Fits 02-10 Ford Explorer 03-05 Lincoln Aviator Window Visors Rain Sun Guard Vent",
+              "productSku": "CJQT2963660",
+              "productImage": "https://cf.cjdropshipping.com/e2c8dd3c-7e74-41b8-8e79-5c0a46c3cd55.jpg",
+              "productWeight": "1000",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Other Replacement Parts",
+              "listingCount": 0,
+              "sellPrice": "36.60",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "Mankee",
+              "supplierId": "1851164621483024384",
+              "categoryId": "CB255FA6-9B4C-4542-82CC-F774DE8F8C68",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072504106303451138",
+              "productName": "[\"For\",\"14-20\",\"Chevrolet\"]",
+              "productNameEn": "For 14-20 Chevrolet Impala Sedan Window Visors Rain Sun Guard Vent Guard 4Pc Set",
+              "productSku": "CJQT2963652",
+              "productImage": "https://cf.cjdropshipping.com/08d469ee-4843-4c03-b1f3-0ded01715e8f.jpg",
+              "productWeight": "1000",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Other Replacement Parts",
+              "listingCount": 0,
+              "sellPrice": "38.98",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "Mankee",
+              "supplierId": "1851164621483024384",
+              "categoryId": "CB255FA6-9B4C-4542-82CC-F774DE8F8C68",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072504771662671874",
+              "productName": "[\"For\",\"Toyota\",\"03-08\"]",
+              "productNameEn": "For T Oyota 03-08 Corolla Sedan 4DR Mugen Style Window Visors Rain Sun Guard Vent",
+              "productSku": "CJQT2963694",
+              "productImage": "https://cf.cjdropshipping.com/259258ed-8b6c-43ec-9c33-b3d1c7722d4b.jpg",
+              "productWeight": "1000",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Other Replacement Parts",
+              "listingCount": 0,
+              "sellPrice": "31.82",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "Mankee",
+              "supplierId": "1851164621483024384",
+              "categoryId": "CB255FA6-9B4C-4542-82CC-F774DE8F8C68",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072504574719127554",
+              "productName": "[\"For\",\"Mustang\",\"15-23\"]",
+              "productNameEn": "For Mustang 15-23 Ford Mustang Coupe Window Visors Rain Sun Guard Vent 2Pc Set",
+              "productSku": "CJQT2963681",
+              "productImage": "https://cf.cjdropshipping.com/8599d8bf-d05c-44bd-8aae-ea54b59af6fc.jpg",
+              "productWeight": "1000",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Other Replacement Parts",
+              "listingCount": 0,
+              "sellPrice": "49.39",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "Mankee",
+              "supplierId": "1851164621483024384",
+              "categoryId": "CB255FA6-9B4C-4542-82CC-F774DE8F8C68",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            },
+            {
+              "pid": "2072505131799977986",
+              "productName": "[\"For\",\"Honda\",\"2018-2022\"]",
+              "productNameEn": "For H Onda 2018-2022 Accord Sedan OE Style Window Visors Rain Sun Guard Vent 4Pc",
+              "productSku": "CJQT2963697",
+              "productImage": "https://cf.cjdropshipping.com/51503298-a233-40c3-beb7-093335a07943.jpg",
+              "productWeight": "1000",
+              "productType": "SUPPLIER_SHIPPED_PRODUCT",
+              "productUnit": null,
+              "categoryName": "Other Replacement Parts",
+              "listingCount": 0,
+              "sellPrice": "46.79",
+              "remark": "",
+              "addMarkStatus": "1",
+              "isFreeShipping": true,
+              "createTime": 1782950400000,
+              "isVideo": null,
+              "saleStatus": 3,
+              "listedNum": 0,
+              "supplierName": "Mankee",
+              "supplierId": "1851164621483024384",
+              "categoryId": "CB255FA6-9B4C-4542-82CC-F774DE8F8C68",
+              "sourceFrom": "0",
+              "shippingCountryCodes": [
+                "CN_US",
+                "US"
+              ],
+              "threeCategoryName": null,
+              "twoCategoryId": null,
+              "twoCategoryName": null,
+              "oneCategoryId": null,
+              "oneCategoryName": null,
+              "customizationVersion": null,
+              "isTestProduct": false
+            }
+          ]
+        },
+        "requestId": "d4c8d65cf58542519d45ac0cfd013b09",
+        "pointsInfo": {
+          "total": 50000,
+          "usedToday": 700,
+          "remaining": 50000
+        },
+        "success": true
+      }
+    },
+    {
+      "step": "GET product/query?pid (wrong)",
+      "httpStatus": 200,
+      "url": "https://developers.cjdropshipping.com/api2.0/v1/product/query?pid=CJYD258310312LO&countryCode=US",
+      "body": {
+        "code": 1602001,
+        "result": false,
+        "message": "Product not found: pid:CJYD258310312LO",
+        "data": null,
+        "requestId": "cc91a4cf27aa40a988933116ebc1d893",
+        "pointsInfo": {
+          "total": 50000,
+          "usedToday": 710,
+          "remaining": 50000
+        },
+        "success": false
+      }
+    }
+  ],
+  "fetched": {
+    "method": "list_variantSku_fallback",
+    "pid": "2072563742376099842"
+  }
+}

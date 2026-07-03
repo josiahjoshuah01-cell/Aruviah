@@ -56,9 +56,14 @@ export default async function SuccessPage({
           ))}
         </div>
 
-        <Button asChild className="mt-8">
-          <Link href="/">Continue shopping</Link>
-        </Button>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <Button asChild>
+            <Link href={`/account/orders/${order.id}`}>View order & tracking</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/">Continue shopping</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

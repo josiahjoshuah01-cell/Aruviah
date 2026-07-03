@@ -11,6 +11,7 @@ import type {
   ReviewEligibility,
   ReviewSummary,
   ReviewWithAuthor,
+  UserOrderSummary,
 } from "@/lib/types";
 
 function hasSupabaseEnv(): boolean {
@@ -484,20 +485,57 @@ export async function getOrderById(id: string): Promise<Order | null> {
   return data;
 }
 
+const ORDER_ITEM_SELECT =
+  "*, variant:product_variants(sku, color, size, image_url, shipping_cost_usd, product:products(title, image_url))";
+
+function normalizeOrderItemVariant(item: {
+  variant?: OrderItem["variant"] | OrderItem["variant"][];
+}): OrderItem {
+  const variant = Array.isArray(item.variant) ? item.variant[0] : item.variant;
+  const product = Array.isArray(variant?.product)
+    ? variant.product[0]
+    : variant?.product;
+  return {
+    ...item,
+    variant: variant
+      ? {
+          ...variant,
+          shipping_cost_usd: Number(variant.shipping_cost_usd ?? 0),
+          product: product ?? undefined,
+        }
+      : undefined,
+  } as OrderItem;
+}
+
 export async function getOrderItems(orderId: string): Promise<OrderItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("order_items")
-    .select(
-      "*, variant:product_variants(sku, image_url, product:products(title, image_url))"
-    )
+    .select(ORDER_ITEM_SELECT)
     .eq("order_id", orderId);
 
   if (error) throw error;
-  return (data ?? []).map((item) => ({
-    ...item,
-    variant: Array.isArray(item.variant) ? item.variant[0] : item.variant,
-  }));
+  return (data ?? []).map((item) => normalizeOrderItemVariant(item));
+}
+
+/** Fetch one order only if it belongs to the signed-in user (RLS + explicit filter). */
+export async function getUserOrderById(id: string): Promise<Order | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return data;
 }
 
 export async function getUserOrders(): Promise<Order[]> {
@@ -516,4 +554,44 @@ export async function getUserOrders(): Promise<Order[]> {
 
   if (error) throw error;
   return data ?? [];
+}
+
+export async function getUserOrdersWithItems(): Promise<UserOrderSummary[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `*,
+      order_items(
+        qty,
+        variant:product_variants(
+          image_url,
+          product:products(image_url, title)
+        )
+      )`
+    )
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => {
+    const items = (row.order_items ?? []).map(
+      (item: {
+        qty: number;
+        variant?: UserOrderSummary["order_items"][0]["variant"] | UserOrderSummary["order_items"][0]["variant"][];
+      }) => ({
+        qty: item.qty,
+        variant: Array.isArray(item.variant) ? item.variant[0] : item.variant,
+      })
+    );
+    const { order_items: _omit, ...order } = row;
+    return { ...order, order_items: items } as UserOrderSummary;
+  });
 }

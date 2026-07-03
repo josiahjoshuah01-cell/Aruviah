@@ -106,6 +106,7 @@ export async function approveStagedProduct(
       size: v.size,
       sku,
       price_usd: v.price_usd,
+      cost_price_usd: v.cost_price_usd,
       shipping_cost_usd: v.shipping_cost_usd,
       stock: v.stock,
       image_url: v.image_url,

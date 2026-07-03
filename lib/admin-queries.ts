@@ -1,8 +1,12 @@
 import { createServiceClient } from "@/lib/supabase/admin";
 import type { OrderStatus } from "@/lib/order-status";
-import { FULFILLMENT_QUEUE_STATUSES } from "@/lib/order-status";
+import { FULFILLMENT_QUEUE_STATUSES, PAID_PLUS_ORDER_STATUSES } from "@/lib/order-status";
 import type { CjPaymentStatus } from "@/lib/cj-payment-types";
 import type { ShippingInfo } from "@/lib/types";
+import {
+  formatCjInterceptReasons,
+  hasCjInterceptReasons,
+} from "@/lib/cj-intercept-display";
 
 export type AdminOrderRow = {
   id: string;
@@ -17,6 +21,7 @@ export type AdminOrderRow = {
   cj_payment_status: CjPaymentStatus;
   cj_order_amount_usd: number | null;
   fulfillment_note: string | null;
+  cj_intercept_reasons: unknown[] | null;
   tracking_number: string | null;
   cj_track_number: string | null;
   cj_tracking_provider: string | null;
@@ -48,6 +53,17 @@ export type AdminNavBadges = {
   fulfillmentCount: number;
   stagingPendingCount: number;
   cjUnpaidCount: number;
+};
+
+export type AdminOverviewStats = {
+  paidOrderCount: number;
+  revenueUsd: number;
+  grossProfitUsd: number;
+  profitMarginPct: number | null;
+  lineItemsWithCost: number;
+  lineItemUnitsWithCost: number;
+  lineItemsWithoutCost: number;
+  lineItemUnitsWithoutCost: number;
 };
 
 export type CjAutoPayLogRow = {
@@ -90,6 +106,7 @@ function mapOrderRow(
     cj_payment_status: string;
     cj_order_amount_usd: number | null;
     fulfillment_note: string | null;
+    cj_intercept_reasons: unknown[] | null;
     tracking_number: string | null;
     cj_track_number: string | null;
     cj_tracking_provider: string | null;
@@ -118,6 +135,9 @@ function mapOrderRow(
         ? Number(row.cj_order_amount_usd)
         : null,
     fulfillment_note: row.fulfillment_note,
+    cj_intercept_reasons: hasCjInterceptReasons(row.cj_intercept_reasons)
+      ? row.cj_intercept_reasons
+      : null,
     tracking_number: row.tracking_number,
     cj_track_number: row.cj_track_number,
     cj_tracking_provider: row.cj_tracking_provider,
@@ -154,6 +174,71 @@ export async function getAdminNavBadges(): Promise<AdminNavBadges> {
   };
 }
 
+export async function getAdminOverviewStats(): Promise<AdminOverviewStats> {
+  const supabase = createServiceClient();
+
+  const [ordersRes, itemsRes] = await Promise.all([
+    supabase
+      .from("orders")
+      .select("id, total")
+      .in("status", PAID_PLUS_ORDER_STATUSES),
+    supabase
+      .from("order_items")
+      .select("qty, price, cost_price_usd, orders!inner(status)")
+      .in("orders.status", PAID_PLUS_ORDER_STATUSES),
+  ]);
+
+  if (ordersRes.error) throw ordersRes.error;
+  if (itemsRes.error) throw itemsRes.error;
+
+  const paidOrderCount = ordersRes.data?.length ?? 0;
+  const revenueUsd = (ordersRes.data ?? []).reduce(
+    (sum, row) => sum + Number(row.total),
+    0
+  );
+
+  let grossProfitUsd = 0;
+  let revenueOnCostedItems = 0;
+  let lineItemsWithCost = 0;
+  let lineItemUnitsWithCost = 0;
+  let lineItemsWithoutCost = 0;
+  let lineItemUnitsWithoutCost = 0;
+
+  for (const row of itemsRes.data ?? []) {
+    const qty = Number(row.qty);
+    const price = Number(row.price);
+    const cost =
+      row.cost_price_usd != null ? Number(row.cost_price_usd) : null;
+
+    if (cost != null) {
+      lineItemsWithCost += 1;
+      lineItemUnitsWithCost += qty;
+      const lineRevenue = price * qty;
+      revenueOnCostedItems += lineRevenue;
+      grossProfitUsd += (price - cost) * qty;
+    } else {
+      lineItemsWithoutCost += 1;
+      lineItemUnitsWithoutCost += qty;
+    }
+  }
+
+  const profitMarginPct =
+    revenueOnCostedItems > 0
+      ? (grossProfitUsd / revenueOnCostedItems) * 100
+      : null;
+
+  return {
+    paidOrderCount,
+    revenueUsd,
+    grossProfitUsd,
+    profitMarginPct,
+    lineItemsWithCost,
+    lineItemUnitsWithCost,
+    lineItemsWithoutCost,
+    lineItemUnitsWithoutCost,
+  };
+}
+
 export async function listAdminOrders(options: {
   status?: string;
   q?: string;
@@ -163,7 +248,7 @@ export async function listAdminOrders(options: {
   let query = supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, cj_intercept_reasons, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
     );
 
   if (options.status && options.status !== "all") {
@@ -202,7 +287,7 @@ export async function getAdminOrderDetail(
   const { data: order, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, cj_intercept_reasons, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
     )
     .eq("id", orderId)
     .maybeSingle();
@@ -248,7 +333,7 @@ export async function listFulfillmentQueue(): Promise<AdminOrderDetail[]> {
   const { data: orders, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, cj_intercept_reasons, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
     )
     .in("status", FULFILLMENT_QUEUE_STATUSES)
     .order("created_at", { ascending: true });
@@ -320,7 +405,7 @@ export async function listOrdersNeedingCjPayment(): Promise<AdminOrderRow[]> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
+      "id, user_id, total, currency, status, paypal_order_id, cj_order_id, cj_shipment_order_id, cj_payment_status, cj_order_amount_usd, fulfillment_note, cj_intercept_reasons, tracking_number, cj_track_number, cj_tracking_provider, cj_tracking_url, cj_tracking_status, cj_last_mile_carrier, cj_last_mile_track_number, shipping, created_at"
     )
     .eq("cj_payment_status", "unpaid")
     .order("created_at", { ascending: true });
@@ -330,7 +415,41 @@ export async function listOrdersNeedingCjPayment(): Promise<AdminOrderRow[]> {
   return (data ?? []).map((r) => mapOrderRow(r, emails.get(r.user_id) ?? null));
 }
 
+export type FulfillmentStuckKind =
+  | "cj_intercept"
+  | "unmapped_sku"
+  | "api_error"
+  | "live_stock"
+  | "other";
+
+export function getFulfillmentStuckKind(
+  order: AdminOrderRow
+): FulfillmentStuckKind {
+  if (hasCjInterceptReasons(order.cj_intercept_reasons)) {
+    return "cj_intercept";
+  }
+  if (
+    order.status === "paid_needs_manual_fulfillment" &&
+    order.fulfillment_note?.startsWith("Unmapped SKU")
+  ) {
+    return "unmapped_sku";
+  }
+  if (
+    order.status === "paid_needs_manual_fulfillment" &&
+    order.fulfillment_note?.includes("live stock")
+  ) {
+    return "live_stock";
+  }
+  if (order.status === "paid_fulfillment_pending") {
+    return "api_error";
+  }
+  return "other";
+}
+
 export function inferFulfillmentStuckReason(order: AdminOrderRow): string {
+  if (hasCjInterceptReasons(order.cj_intercept_reasons)) {
+    return formatCjInterceptReasons(order.cj_intercept_reasons).join(" · ");
+  }
   if (order.fulfillment_note) return order.fulfillment_note;
   if (order.status === "paid_needs_manual_fulfillment") {
     return "CJ auto-fulfillment skipped — one or more line-item SKUs lack a CJ variant mapping.";

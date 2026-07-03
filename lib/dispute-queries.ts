@@ -18,6 +18,37 @@ export type LocalDisputeRow = {
   updated_at: string;
 };
 
+function isOpenDisputeStatus(status: string): boolean {
+  const s = status.toLowerCase();
+  return s === "processing" || s === "pending";
+}
+
+/** Customer-safe: verifies order ownership before checking disputes (service role). */
+export async function customerHasOpenDisputeForOrder(
+  orderId: string,
+  userId: string
+): Promise<boolean> {
+  const supabase = createServiceClient();
+
+  const { data: order } = await supabase
+    .from("orders")
+    .select("id")
+    .eq("id", orderId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!order) return false;
+
+  const { data: disputes, error } = await supabase
+    .from("disputes")
+    .select("status")
+    .eq("order_id", orderId);
+
+  if (error) return false;
+
+  return (disputes ?? []).some((d) => isOpenDisputeStatus(d.status));
+}
+
 export async function listDisputesForOrder(
   orderId: string
 ): Promise<LocalDisputeRow[]> {

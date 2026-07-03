@@ -1,0 +1,84 @@
+{
+  "project": "jlbrfsnvzmzcrfaigseb",
+  "productId": "d909ff3d-e6a2-49f8-baaf-a4e2e82905c1",
+  "productTitle": "Manual Slow Cooker, Easy To Use Program-Free Kitchen Appliance, Great For Pot Roast And Chili",
+  "cj_product_id": "2071774535708209153",
+  "steps": [
+    {
+      "step": "1a order_items.variant_id column",
+      "pass": true,
+      "detail": "present — post-variant-migration schema"
+    },
+    {
+      "step": "1b reviews table reachable",
+      "pass": true,
+      "detail": "reviews + order_items queries OK via service role"
+    },
+    {
+      "step": "2a product page loads",
+      "pass": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "step": "2b logged-out gating",
+      "pass": true,
+      "detail": "Sign-in prompt shown, no review form"
+    },
+    {
+      "step": "2c no CJ review data on product page",
+      "pass": true,
+      "detail": "HTML clean of cj_review fields"
+    },
+    {
+      "step": "3 non-buyer gating",
+      "pass": true,
+      "detail": "No review form for user without purchase"
+    },
+    {
+      "step": "4 seed paid order",
+      "pass": true,
+      "detail": "order 7b4daa6e-0826-492c-b70c-783d994fece1 with variant_id 5b485b60-4e58-49aa-8f96-276e67f1e762 (product d909ff3d-e6a2-49f8-baaf-a4e2e82905c1)"
+    },
+    {
+      "step": "4b eligibility uses variant_id join",
+      "pass": true,
+      "detail": "order_items → product_variants.product_id (not stale product_id on order_items)"
+    },
+    {
+      "step": "5a eligible buyer sees form",
+      "pass": true,
+      "detail": "Write a review form present"
+    },
+    {
+      "step": "5b review insert (RLS)",
+      "pass": true,
+      "detail": "Verified buyer insert succeeded"
+    },
+    {
+      "step": "5c duplicate blocked",
+      "pass": true,
+      "detail": "duplicate key value violates unique constraint \"reviews_user_id_product_id_order"
+    },
+    {
+      "step": "5d non-buyer insert blocked by RLS",
+      "pass": true,
+      "detail": "42501"
+    },
+    {
+      "step": "6 post-submit product page",
+      "pass": true,
+      "detail": "avg=5.0 count=1 comment visible, already reviewed"
+    },
+    {
+      "step": "7 unpaid/pending order blocked",
+      "pass": true,
+      "detail": "42501"
+    },
+    {
+      "step": "8 cleanup",
+      "pass": true,
+      "detail": "test users, orders, reviews removed"
+    }
+  ],
+  "ok": true
+}

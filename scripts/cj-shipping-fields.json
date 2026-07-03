@@ -1,0 +1,49 @@
+[
+  {
+    "pid": "2070159544046288898",
+    "list_shippingCountryCodes": null,
+    "query_variant_inventories_sample": null,
+    "variant_queryByVid_inventories": [
+      {
+        "countryCode": "US",
+        "totalInventory": 1,
+        "cjInventory": 1,
+        "factoryInventory": 0,
+        "verifiedWarehouse": 1,
+        "stock": [
+          {
+            "stockId": "2069235520784220162",
+            "inventory": 1,
+            "factoryInventory": 0
+          }
+        ]
+      }
+    ],
+    "stock_queryByVid_rows": [
+      {
+        "vid": "2070159544226643970",
+        "areaId": "2",
+        "areaEn": "US Warehouse",
+        "countryCode": "US",
+        "storageNum": 1,
+        "totalInventoryNum": 1,
+        "cjInventoryNum": 1,
+        "factoryInventoryNum": 0,
+        "stock": [
+          {
+            "stockId": "2069235520784220162",
+            "inventory": 1,
+            "factoryInventory": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "pid": "2606270658351616600",
+    "list_shippingCountryCodes": null,
+    "query_variant_inventories_sample": null,
+    "variant_queryByVid_inventories": null,
+    "stock_queryByVid_rows": null
+  }
+]

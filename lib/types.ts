@@ -57,6 +57,12 @@ export type Order = {
   currency: string;
   status: string;
   paypal_order_id: string | null;
+  cj_track_number: string | null;
+  cj_tracking_provider: string | null;
+  cj_tracking_url: string | null;
+  cj_tracking_status: string | null;
+  cj_last_mile_carrier: string | null;
+  cj_last_mile_track_number: string | null;
   shipping: ShippingInfo;
   created_at: string;
 };
@@ -78,9 +84,22 @@ export type OrderItem = {
   price: number;
   variant?: {
     sku: string;
+    color: string | null;
+    size: string | null;
     image_url: string | null;
+    shipping_cost_usd: number;
     product?: Pick<Product, "title" | "image_url">;
   };
+};
+
+export type UserOrderSummary = Order & {
+  order_items: {
+    qty: number;
+    variant: {
+      image_url: string | null;
+      product: { image_url: string | null; title: string } | null;
+    } | null;
+  }[];
 };
 
 export type CartItem = {
