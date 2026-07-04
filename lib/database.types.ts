@@ -19,6 +19,7 @@ export type Database = {
           cj_category_id: string | null
           id: string
           name: string
+          section: string | null
           slug: string
           sort_order: number
         }
@@ -26,6 +27,7 @@ export type Database = {
           cj_category_id?: string | null
           id?: string
           name: string
+          section?: string | null
           slug: string
           sort_order?: number
         }
@@ -33,6 +35,7 @@ export type Database = {
           cj_category_id?: string | null
           id?: string
           name?: string
+          section?: string | null
           slug?: string
           sort_order?: number
         }

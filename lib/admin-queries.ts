@@ -526,3 +526,67 @@ export async function markOrderManuallyFulfilled(
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
+
+export type AdminCategoryRow = {
+  id: string;
+  name: string;
+  slug: string;
+  sort_order: number;
+  section: string | null;
+  product_count: number;
+};
+
+/** All categories with active product counts — for admin section assignment. */
+export async function listAdminCategories(): Promise<AdminCategoryRow[]> {
+  const supabase = createServiceClient();
+
+  const { data: categories, error: catError } = await supabase
+    .from("categories")
+    .select("id, name, slug, sort_order, section")
+    .order("sort_order", { ascending: true });
+
+  if (catError) throw catError;
+  if (!categories?.length) return [];
+
+  const { data: products, error: prodError } = await supabase
+    .from("products")
+    .select("category_id")
+    .eq("is_active", true)
+    .not("category_id", "is", null);
+
+  if (prodError) throw prodError;
+
+  const counts = new Map<string, number>();
+  for (const p of products ?? []) {
+    if (p.category_id) {
+      counts.set(p.category_id, (counts.get(p.category_id) ?? 0) + 1);
+    }
+  }
+
+  return categories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    sort_order: c.sort_order,
+    section: c.section ?? null,
+    product_count: counts.get(c.id) ?? 0,
+  }));
+}
+
+/** Distinct non-empty section labels already in use — for admin dropdown suggestions. */
+export async function listCategorySections(): Promise<string[]> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("section")
+    .not("section", "is", null);
+
+  if (error) throw error;
+
+  const unique = new Set<string>();
+  for (const row of data ?? []) {
+    const s = row.section?.trim();
+    if (s) unique.add(s);
+  }
+  return [...unique].sort((a, b) => a.localeCompare(b));
+}

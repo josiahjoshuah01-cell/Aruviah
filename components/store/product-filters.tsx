@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -219,18 +220,18 @@ export function ProductFilters({
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="overflow-y-auto">
+          <SheetContent side="bottom">
             <SheetHeader>
               <SheetTitle>Filters</SheetTitle>
             </SheetHeader>
-            <div className="mt-4 pb-6">
+            <SheetBody>
               <FilterFields
                 basePath={basePath}
                 filters={filters}
                 availableSizes={availableSizes}
                 onNavigate={() => setOpen(false)}
               />
-            </div>
+            </SheetBody>
           </SheetContent>
         </Sheet>
         {activeCount > 0 && (

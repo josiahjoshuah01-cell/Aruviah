@@ -42,13 +42,24 @@ const SheetContent = React.forwardRef<
         side === "left" &&
           "inset-y-0 left-0 h-full w-full max-w-md border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
         side === "bottom" &&
-          "inset-x-0 bottom-0 max-h-[85vh] rounded-t-xl border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+          "inset-x-0 bottom-0 flex h-auto max-h-[80vh] flex-col gap-0 overflow-hidden rounded-t-xl border-t p-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
         className
       )}
       {...props}
     >
+      {side === "bottom" && (
+        <div
+          className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-border"
+          aria-hidden
+        />
+      )}
       {children}
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-mist transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-stream focus:ring-offset-2">
+      <SheetPrimitive.Close
+        className={cn(
+          "absolute rounded-sm opacity-70 ring-offset-mist transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-stream focus:ring-offset-2",
+          side === "bottom" ? "right-4 top-3" : "right-4 top-4"
+        )}
+      >
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
@@ -62,10 +73,28 @@ const SheetHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("flex flex-col space-y-2 text-center sm:text-left", className)}
+    className={cn(
+      "flex flex-col space-y-2 px-6 pt-2 text-center sm:text-left",
+      className
+    )}
     {...props}
   />
 );
+
+/** Scrollable body region for bottom sheets — keeps sheet height content-driven up to max-h. */
+const SheetBody = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6",
+      className
+    )}
+    {...props}
+  />
+);
+SheetBody.displayName = "SheetBody";
 
 const SheetTitle = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Title>,
@@ -99,6 +128,7 @@ export {
   SheetClose,
   SheetContent,
   SheetHeader,
+  SheetBody,
   SheetTitle,
   SheetDescription,
 };

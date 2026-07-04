@@ -4,6 +4,8 @@ export type Category = {
   slug: string;
   sort_order: number;
   cj_category_id?: string | null;
+  /** Mega-menu display group label; null = unassigned (shown under "More"). */
+  section?: string | null;
 };
 
 export type ProductVariant = {
