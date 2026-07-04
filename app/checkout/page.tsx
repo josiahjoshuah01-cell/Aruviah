@@ -380,6 +380,26 @@ export default function CheckoutPage() {
             </p>
           )}
 
+          <p className="mb-4 text-xs text-muted-foreground">
+            By placing this order, you agree to our{" "}
+            <Link
+              href="/legal/terms"
+              className="text-stream underline underline-offset-2 hover:text-stream/80"
+              target="_blank"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/legal/privacy"
+              className="text-stream underline underline-offset-2 hover:text-stream/80"
+              target="_blank"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </p>
+
           <div className={canPay ? "" : "pointer-events-none opacity-50"}>
             <PayPalScriptProvider
               options={{
