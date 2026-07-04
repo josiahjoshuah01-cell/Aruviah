@@ -40,11 +40,19 @@ function FilterFields({
   filters,
   availableSizes,
   onNavigate,
-}: ProductFiltersProps & { onNavigate?: () => void }) {
+  layout = "sidebar",
+  idPrefix = "filter",
+}: ProductFiltersProps & {
+  onNavigate?: () => void;
+  layout?: "sidebar" | "compact";
+  idPrefix?: string;
+}) {
+  const isSidebar = layout === "sidebar";
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {availableSizes.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <Label className="text-sm font-medium">Size</Label>
           <div className="flex flex-wrap gap-2">
             <Link
@@ -90,12 +98,16 @@ function FilterFields({
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <Label className="text-sm font-medium">Price range (USD)</Label>
         <form
           action={basePath}
           method="get"
-          className="flex flex-wrap items-end gap-2"
+          className={cn(
+            isSidebar
+              ? "flex flex-col gap-3"
+              : "flex flex-wrap items-end gap-2"
+          )}
           onSubmit={onNavigate}
         >
           {filters.q && (
@@ -108,47 +120,58 @@ function FilterFields({
             <input type="hidden" name="sort" value={filters.sort} />
           )}
           <div className="space-y-1">
-            <Label htmlFor="minPrice" className="text-xs text-muted-foreground">
+            <Label
+              htmlFor={`${idPrefix}-minPrice`}
+              className="text-xs text-muted-foreground"
+            >
               Min
             </Label>
             <Input
-              id="minPrice"
+              id={`${idPrefix}-minPrice`}
               name="minPrice"
               type="number"
               min={0}
               step="0.01"
               placeholder="0"
               defaultValue={filters.minPrice ?? ""}
-              className="w-24 tabular-price"
+              className={cn("tabular-price", isSidebar ? "w-full" : "w-24")}
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="maxPrice" className="text-xs text-muted-foreground">
+            <Label
+              htmlFor={`${idPrefix}-maxPrice`}
+              className="text-xs text-muted-foreground"
+            >
               Max
             </Label>
             <Input
-              id="maxPrice"
+              id={`${idPrefix}-maxPrice`}
               name="maxPrice"
               type="number"
               min={0}
               step="0.01"
               placeholder="Any"
               defaultValue={filters.maxPrice ?? ""}
-              className="w-24 tabular-price"
+              className={cn("tabular-price", isSidebar ? "w-full" : "w-24")}
             />
           </div>
-          <Button type="submit" size="sm" variant="secondary">
+          <Button
+            type="submit"
+            size="sm"
+            variant="secondary"
+            className={cn(isSidebar && "w-full")}
+          >
             Apply
           </Button>
         </form>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="sort" className="text-sm font-medium">
+      <div className="space-y-2.5">
+        <Label htmlFor={`${idPrefix}-sort`} className="text-sm font-medium">
           Sort
         </Label>
         <select
-          id="sort"
+          id={`${idPrefix}-sort`}
           value={filters.sort ?? ""}
           onChange={(e) => {
             const value = e.target.value;
@@ -162,7 +185,7 @@ function FilterFields({
             window.location.href = href;
             onNavigate?.();
           }}
-          className="h-10 w-full max-w-xs rounded-md border border-input bg-mist px-3 text-sm text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
+          className="h-10 w-full rounded-md border border-input bg-mist px-3 text-sm text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value || "newest"} value={opt.value}>
@@ -188,26 +211,40 @@ export function ProductFilters({
   const clearHref = catalogClearAllHref(basePath, filters);
 
   return (
-    <div className="mb-6">
-      <div className="hidden md:block">
-        <div className="flex flex-wrap items-end justify-between gap-4 rounded-lg border border-border bg-mist p-4 dark:bg-current/5">
+    <>
+      <aside className="hidden md:sticky md:top-6 md:block md:w-[260px] md:shrink-0 md:self-start">
+        <div className="rounded-lg border border-border bg-mist p-5 dark:bg-current/5">
+          <div className="mb-5 flex items-center justify-between gap-3 border-b border-border pb-4">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-sm font-semibold tracking-tight text-current">
+                Filters
+              </h2>
+              {activeCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-stream px-1.5 text-[10px] font-bold text-white">
+                  {activeCount}
+                </span>
+              )}
+            </div>
+            {activeCount > 0 && (
+              <Link
+                href={clearHref}
+                className="shrink-0 text-xs text-stream underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
+              >
+                Clear all
+              </Link>
+            )}
+          </div>
           <FilterFields
             basePath={basePath}
             filters={filters}
             availableSizes={availableSizes}
+            layout="sidebar"
+            idPrefix="desktop"
           />
-          {activeCount > 0 && (
-            <Link
-              href={clearHref}
-              className="shrink-0 text-sm text-stream underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
-            >
-              Clear all
-            </Link>
-          )}
         </div>
-      </div>
+      </aside>
 
-      <div className="flex items-center justify-between md:hidden">
+      <div className="mb-4 flex items-center justify-between md:hidden">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
@@ -230,6 +267,8 @@ export function ProductFilters({
                 filters={filters}
                 availableSizes={availableSizes}
                 onNavigate={() => setOpen(false)}
+                layout="compact"
+                idPrefix="mobile"
               />
             </SheetBody>
           </SheetContent>
@@ -243,6 +282,6 @@ export function ProductFilters({
           </Link>
         )}
       </div>
-    </div>
+    </>
   );
 }

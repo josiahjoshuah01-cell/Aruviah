@@ -32,20 +32,22 @@ export async function ProductCatalog({
   ]);
 
   return (
-    <>
+    <div className="md:grid md:grid-cols-[260px_minmax(0,1fr)] md:items-start md:gap-8">
       <ProductFilters
         basePath={basePath}
         filters={filters}
         availableSizes={availableSizes}
         ignoreCategoryInCount={!!categorySlug}
       />
-      {products.length === 0 ? (
-        <p className="py-12 text-center text-muted-foreground">
-          No products match your filters.
-        </p>
-      ) : (
-        <ProductGrid products={products} />
-      )}
-    </>
+      <div className="min-w-0">
+        {products.length === 0 ? (
+          <p className="py-12 text-center text-muted-foreground">
+            No products match your filters.
+          </p>
+        ) : (
+          <ProductGrid products={products} />
+        )}
+      </div>
+    </div>
   );
 }
