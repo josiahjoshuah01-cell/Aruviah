@@ -50,11 +50,18 @@ function FilterFields({
   const isSidebar = layout === "sidebar";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div
+      className={cn(
+        "flex flex-col",
+        isSidebar ? "gap-3.5" : "gap-6"
+      )}
+    >
       {availableSizes.length > 0 && (
-        <div className="space-y-2.5">
-          <Label className="text-sm font-medium">Size</Label>
-          <div className="flex flex-wrap gap-2">
+        <div className={cn(isSidebar ? "space-y-1.5" : "space-y-2.5")}>
+          <Label className={cn("font-medium", isSidebar ? "text-xs" : "text-sm")}>
+            Size
+          </Label>
+          <div className={cn("flex flex-wrap", isSidebar ? "gap-1.5" : "gap-2")}>
             <Link
               href={buildCatalogHref(basePath, filters, {
                 size: undefined,
@@ -62,7 +69,8 @@ function FilterFields({
               })}
               onClick={onNavigate}
               className={cn(
-                "relative rounded-full border px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream",
+                "relative rounded-full border font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream",
+                isSidebar ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm",
                 !filters.size
                   ? "border-stream bg-stream/10 text-stream"
                   : "border-border text-muted-foreground hover:border-stream/50"
@@ -81,7 +89,8 @@ function FilterFields({
                   href={buildCatalogHref(basePath, filters, { size })}
                   onClick={onNavigate}
                   className={cn(
-                    "relative rounded-full border px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream",
+                    "relative rounded-full border font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream",
+                    isSidebar ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm",
                     active
                       ? "border-stream bg-stream/10 text-stream"
                       : "border-border text-muted-foreground hover:border-stream/50 hover:text-current"
@@ -98,14 +107,16 @@ function FilterFields({
         </div>
       )}
 
-      <div className="space-y-2.5">
-        <Label className="text-sm font-medium">Price range (USD)</Label>
+      <div className={cn(isSidebar ? "space-y-1.5" : "space-y-2.5")}>
+        <Label className={cn("font-medium", isSidebar ? "text-xs" : "text-sm")}>
+          Price range (USD)
+        </Label>
         <form
           action={basePath}
           method="get"
           className={cn(
             isSidebar
-              ? "flex flex-col gap-3"
+              ? "flex flex-col gap-2"
               : "flex flex-wrap items-end gap-2"
           )}
           onSubmit={onNavigate}
@@ -134,7 +145,10 @@ function FilterFields({
               step="0.01"
               placeholder="0"
               defaultValue={filters.minPrice ?? ""}
-              className={cn("tabular-price", isSidebar ? "w-full" : "w-24")}
+              className={cn(
+                "tabular-price",
+                isSidebar ? "h-8 w-full text-xs" : "w-24"
+              )}
             />
           </div>
           <div className="space-y-1">
@@ -152,22 +166,28 @@ function FilterFields({
               step="0.01"
               placeholder="Any"
               defaultValue={filters.maxPrice ?? ""}
-              className={cn("tabular-price", isSidebar ? "w-full" : "w-24")}
+              className={cn(
+                "tabular-price",
+                isSidebar ? "h-8 w-full text-xs" : "w-24"
+              )}
             />
           </div>
           <Button
             type="submit"
             size="sm"
             variant="secondary"
-            className={cn(isSidebar && "w-full")}
+            className={cn(isSidebar && "h-8 w-full text-xs")}
           >
             Apply
           </Button>
         </form>
       </div>
 
-      <div className="space-y-2.5">
-        <Label htmlFor={`${idPrefix}-sort`} className="text-sm font-medium">
+      <div className={cn(isSidebar ? "space-y-1.5" : "space-y-2.5")}>
+        <Label
+          htmlFor={`${idPrefix}-sort`}
+          className={cn("font-medium", isSidebar ? "text-xs" : "text-sm")}
+        >
           Sort
         </Label>
         <select
@@ -185,7 +205,10 @@ function FilterFields({
             window.location.href = href;
             onNavigate?.();
           }}
-          className="h-10 w-full rounded-md border border-input bg-mist px-3 text-sm text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
+          className={cn(
+            "w-full rounded-md border border-input bg-mist text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream",
+            isSidebar ? "h-8 px-2 text-xs" : "h-10 px-3 text-sm"
+          )}
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value || "newest"} value={opt.value}>
@@ -212,15 +235,15 @@ export function ProductFilters({
 
   return (
     <>
-      <aside className="hidden md:sticky md:top-6 md:block md:w-[260px] md:shrink-0 md:self-start">
-        <div className="rounded-lg border border-border bg-mist p-5 dark:bg-current/5">
-          <div className="mb-5 flex items-center justify-between gap-3 border-b border-border pb-4">
-            <div className="flex items-center gap-2">
-              <h2 className="font-display text-sm font-semibold tracking-tight text-current">
+      <aside className="hidden md:sticky md:top-6 md:block md:w-[210px] md:shrink-0 md:self-start md:border-r md:border-border/40 md:pr-4">
+        <div className="flex flex-col">
+          <div className="mb-3 flex items-center justify-between gap-2 border-b border-border/40 pb-2">
+            <div className="flex items-center gap-1.5">
+              <h2 className="font-display text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Filters
               </h2>
               {activeCount > 0 && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-stream px-1.5 text-[10px] font-bold text-white">
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-stream px-1 text-[9px] font-bold text-white">
                   {activeCount}
                 </span>
               )}
@@ -228,7 +251,7 @@ export function ProductFilters({
             {activeCount > 0 && (
               <Link
                 href={clearHref}
-                className="shrink-0 text-xs text-stream underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
+                className="shrink-0 text-[11px] text-stream underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
               >
                 Clear all
               </Link>

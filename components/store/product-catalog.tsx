@@ -32,7 +32,7 @@ export async function ProductCatalog({
   ]);
 
   return (
-    <div className="md:grid md:grid-cols-[260px_minmax(0,1fr)] md:items-start md:gap-8">
+    <div className="md:-ml-6 md:grid md:w-[calc(100%+1.5rem)] md:grid-cols-[210px_minmax(0,1fr)] md:items-start md:gap-4 md:pl-6">
       <ProductFilters
         basePath={basePath}
         filters={filters}
