@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ClipboardList, ShoppingBag } from "lucide-react";
+import { Shield, ShoppingBag } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/store/search-bar";
 import { CartDrawer } from "@/components/store/cart-drawer";
@@ -69,13 +69,12 @@ export function Header({ isAdmin = false, isLoggedIn = false }: HeaderProps) {
           </Link>
           {isAdmin && (
             <Link
-              href="/admin/staging"
+              href="/admin"
               suppressHydrationWarning
-              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-stream hover:text-stream/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
-              title="Admin staging"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-stream hover:bg-stream/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stream"
+              title="Admin panel"
             >
-              <ClipboardList className="h-4 w-4" />
-              <span className="hidden sm:inline">Staging</span>
+              <Shield className="h-5 w-5" />
             </Link>
           )}
           {isLoggedIn ? (

@@ -460,6 +460,42 @@ export function inferFulfillmentStuckReason(order: AdminOrderRow): string {
   return "Awaiting manual fulfillment.";
 }
 
+export type AdminUserRow = {
+  id: string;
+  email: string | null;
+  created_at: string;
+  adminKind: "founder" | "granted" | null;
+};
+
+export async function listAllUsers(): Promise<AdminUserRow[]> {
+  const supabase = createServiceClient();
+  const founderEmail = process.env.ADMIN_EMAIL?.trim() ?? null;
+
+  const { data: adminRows } = await supabase
+    .from("admin_users")
+    .select("user_id");
+  const adminSet = new Set((adminRows ?? []).map((r) => r.user_id));
+
+  const {
+    data: { users },
+  } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+
+  return (users ?? []).map((u) => {
+    let adminKind: "founder" | "granted" | null = null;
+    if (founderEmail && u.email === founderEmail) {
+      adminKind = "founder";
+    } else if (adminSet.has(u.id)) {
+      adminKind = "granted";
+    }
+    return {
+      id: u.id,
+      email: u.email ?? null,
+      created_at: u.created_at,
+      adminKind,
+    };
+  });
+}
+
 export async function updateOrderStatusAdmin(
   orderId: string,
   status: OrderStatus
