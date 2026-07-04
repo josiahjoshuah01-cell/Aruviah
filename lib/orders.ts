@@ -3,6 +3,7 @@ import { createCJOrder, type CJOrderResult } from "@/lib/cj";
 import { calculateCheckoutShipping } from "@/lib/checkout-shipping";
 import { verifyCjLiveStockAtCheckout } from "@/lib/cj-stock";
 import { parseCjOrderAmountUsd, tryAutoPayCjOrder } from "@/lib/cj-payment";
+import { trySendOrderConfirmation } from "@/lib/email";
 import type { CartItemInput, ShippingAddress } from "@/lib/validations";
 
 export type ResolvedCartItem = {
@@ -317,6 +318,9 @@ export async function fulfillOrder(params: {
     console.error("[fulfillOrder] RPC failed:", rpcError);
     return { error: "Failed to create order" };
   }
+
+  // Fire-and-forget: send order confirmation email (never blocks fulfillment)
+  trySendOrderConfirmation(orderId as string, params.userId).catch(() => {});
 
   const { data: authUser } = await supabase.auth.admin.getUserById(
     params.userId

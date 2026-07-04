@@ -16,14 +16,12 @@ export default async function StoreLayout({
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-mist">
+    <div className="min-h-screen bg-mist">
       <Header isAdmin={session.isAdmin} isLoggedIn={session.isLoggedIn} />
       <Suspense fallback={null}>
         <CategoryRail categories={categories} />
       </Suspense>
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-6">
-        {children}
-      </main>
+      <main className="mx-auto max-w-7xl px-4 py-6 md:px-6">{children}</main>
       <Footer />
     </div>
   );

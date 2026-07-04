@@ -1,10 +1,7 @@
 /*
  * IMPORTANT — DRAFT LEGAL CONTENT
  * This is template content for the business owner to review with a lawyer
- * before treating as final. In particular:
- * - The "Governing Law" section contains a placeholder that MUST be filled
- *   in with your real jurisdiction before this is legally meaningful.
- * - The contact email should be updated if support@aruviah.com is not yet active.
+ * before treating as final.
  */
 
 import type { Metadata } from "next";
@@ -140,17 +137,13 @@ export default function TermsOfServicePage() {
         merchantability, fitness for a particular purpose, or non-infringement.
       </p>
 
-      {/* TODO: OWNER MUST FILL IN — Replace the placeholder below with your
-          actual governing jurisdiction (e.g. "the State of Texas, United States"
-          or "the laws of England and Wales"). This section is not legally
-          meaningful until a real jurisdiction is specified. */}
       <h2>12. Governing Law</h2>
       <p>
         These Terms shall be governed by and construed in accordance with the
-        laws of{" "}
-        <strong>[Governing law/jurisdiction to be specified]</strong>. Any
-        disputes arising under these Terms shall be resolved in the courts of
-        that jurisdiction.
+        laws of the State of Delaware, United States, without regard to conflict
+        of law principles. Any disputes arising under these Terms shall be
+        resolved in the state or federal courts located in the State of
+        Delaware.
       </p>
 
       <h2>13. Changes to These Terms</h2>
