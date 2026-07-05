@@ -142,7 +142,7 @@ export function VariantSelector({
         {displayImage ? (
           <Image
             src={displayImage}
-            alt={productTitle}
+            alt=""
             fill
             sizes="(max-width: 768px) 100vw, 352px"
             className="object-cover"

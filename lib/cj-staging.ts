@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
-  cleanTitle,
   parseColorSize,
   parsePrice,
   type CJVariantLike,
@@ -15,6 +14,10 @@ import {
 import { fetchCjProductReviewSummary } from "@/lib/cj-product-comments";
 import type { CjReviewSummary } from "@/lib/cj-product-comments";
 import { sanitizeCjDescription } from "@/lib/cj-description";
+import {
+  appendOriginalTitleToDescription,
+  sanitizeCjTitle,
+} from "@/lib/cj-title";
 import {
   aggregateProductVerifiedWarehouse,
   resolveVariantVerifiedWarehouse,
@@ -486,15 +489,19 @@ export function buildStagedRow(
       ? Math.min(...stagedVariants.map((v) => v.price_usd))
       : Math.round(minCost * CJ_MARKUP_MULTIPLIER * 100) / 100;
 
-  const description = sanitizeCjDescription(
+  const rawTitle = detail.productNameEn ?? "";
+  const title = sanitizeCjTitle(rawTitle);
+
+  let description = sanitizeCjDescription(
     detail.description,
-    cleanTitle(detail.productNameEn),
+    title,
     detail.categoryName ?? undefined
   );
+  description = appendOriginalTitleToDescription(description, rawTitle, title);
 
   return {
     cj_product_id: detail.pid,
-    title: cleanTitle(detail.productNameEn),
+    title,
     description,
     cost_price_usd: minCost,
     suggested_price_usd: minRetail,

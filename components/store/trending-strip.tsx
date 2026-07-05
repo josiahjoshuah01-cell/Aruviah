@@ -32,7 +32,7 @@ export function TrendingStrip({ products }: { products: Product[] }) {
               {product.image_url && (
                 <Image
                   src={product.image_url}
-                  alt={product.title}
+                  alt=""
                   fill
                   sizes="144px"
                   className="object-cover transition-transform group-hover:scale-105"

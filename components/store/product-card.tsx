@@ -18,7 +18,7 @@ export function ProductCard({
         {product.image_url ? (
           <Image
             src={product.image_url}
-            alt={product.title}
+            alt=""
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"

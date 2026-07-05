@@ -6,7 +6,9 @@ export function parsePrice(raw: string | number | null | undefined): number {
   return match ? parseFloat(match[0]) : 0;
 }
 
+/** @deprecated Prefer sanitizeCjTitle from @/lib/cj-title */
 export function cleanTitle(title: string): string {
+  // Lazy import avoided — duplicate minimal strip for legacy import scripts.
   return title
     .replace(/\bfree shipping\b/gi, "")
     .replace(/\bhot sale\b/gi, "")
